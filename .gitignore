@@ -1,0 +1,4 @@
+# ignore the corpus
+corpus/*
+
+corpus.csv
