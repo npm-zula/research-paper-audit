@@ -2,3 +2,6 @@
 corpus/*
 
 corpus.csv
+
+/review_classifier
+/review_classifier/*
