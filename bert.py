@@ -146,3 +146,37 @@ if __name__ == "__main__":
     # Save the model and tokenizer
     model.save_pretrained('./review_classifier')
     tokenizer.save_pretrained('./review_classifier')
+
+
+    """
+    Epoch 1/10: 100%|██████████| 25/25 [00:17<00:00,  1.42it/s]
+Average training loss: 1.0102
+Validation Accuracy: 0.5400
+Epoch 2/10: 100%|██████████| 25/25 [00:17<00:00,  1.40it/s]
+Average training loss: 0.8119
+Validation Accuracy: 0.5800
+Epoch 3/10: 100%|██████████| 25/25 [00:18<00:00,  1.37it/s]
+Average training loss: 0.6088
+Validation Accuracy: 0.6400
+Epoch 4/10: 100%|██████████| 25/25 [00:18<00:00,  1.36it/s]
+Average training loss: 0.4091
+Validation Accuracy: 0.6800
+Epoch 5/10: 100%|██████████| 25/25 [00:18<00:00,  1.37it/s]
+Average training loss: 0.2837
+Validation Accuracy: 0.6400
+Epoch 6/10: 100%|██████████| 25/25 [00:18<00:00,  1.38it/s]
+Average training loss: 0.2050
+Validation Accuracy: 0.6400
+Epoch 7/10: 100%|██████████| 25/25 [00:18<00:00,  1.37it/s]
+Average training loss: 0.1334
+Validation Accuracy: 0.6200
+Epoch 8/10: 100%|██████████| 25/25 [00:18<00:00,  1.37it/s]
+Average training loss: 0.1043
+Validation Accuracy: 0.6400
+Epoch 9/10: 100%|██████████| 25/25 [00:18<00:00,  1.37it/s]
+Average training loss: 0.0824
+Validation Accuracy: 0.6400
+Epoch 10/10: 100%|██████████| 25/25 [00:18<00:00,  1.38it/s]
+Average training loss: 0.0720
+Validation Accuracy: 0.6600
+    """

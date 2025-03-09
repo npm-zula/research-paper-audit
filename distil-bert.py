@@ -108,7 +108,10 @@ training_args = TrainingArguments(
     load_best_model_at_end=True,
     metric_for_best_model="f1",
     fp16=torch.cuda.is_available(),
-    report_to="none",
+    logging_dir="./logs",
+    logging_strategy="steps",
+    logging_steps=10,
+    report_to="tensorboard",
 )
 
 # Initialize Trainer
@@ -149,3 +152,15 @@ def predict(text, model, tokenizer):
     predicted_class_idx = torch.argmax(probabilities).item()
     
     return model.config.id2label[predicted_class_idx], probabilities.tolist()[0]
+
+"""
+Epoch	Training Loss	Validation Loss	Accuracy	F1
+1	1.083400	1.009396	0.459459	0.289289
+2	0.977400	0.909536	0.459459	0.289289
+3	0.893200	0.767690	0.675676	0.644673
+4	0.744200	0.663561	0.756757	0.729066
+5	0.623800	0.605594	0.702703	0.682436
+6	0.527500	0.597340	0.648649	0.642523
+ [3/3 00:00]
+Test results: {'eval_loss': 0.7004138827323914, 'eval_accuracy': 0.6842105263157895, 'eval_f1': 0.6605263157894736, 'eval_runtime': 0.2194, 'eval_samples_per_second': 173.2, 'eval_steps_per_second': 13.674, 'epoch': 6.0}
+"""
