@@ -6,6 +6,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 import numpy as np
 from tqdm import tqdm
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import classification_report, confusion_matrix, precision_recall_fscore_support
 
 # Set random seed for reproducibility
 torch.manual_seed(42)
@@ -38,6 +41,49 @@ class ReviewDataset(Dataset):
             'labels': torch.tensor(self.labels[idx], dtype=torch.long)
         }
 
+def plot_confusion_matrix(y_true, y_pred, class_names):
+    cm = confusion_matrix(y_true, y_pred)
+    plt.figure(figsize=(12, 10))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
+                xticklabels=class_names, yticklabels=class_names)
+    plt.xlabel('Predicted')
+    plt.ylabel('True')
+    plt.title('Confusion Matrix')
+    plt.tight_layout()
+    plt.savefig('bert_confusion_matrix.png')
+    plt.close()
+
+def plot_training_history(train_losses, val_losses, val_accuracies, val_f1s, val_precisions, val_recalls):
+    plt.figure(figsize=(15, 5))
+    
+    plt.subplot(1, 3, 1)
+    plt.plot(train_losses, label='Training Loss')
+    plt.plot(val_losses, label='Validation Loss')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.title('Training and Validation Loss')
+    
+    plt.subplot(1, 3, 2)
+    plt.plot(val_accuracies, label='Accuracy')
+    plt.plot(val_f1s, label='F1 Score')
+    plt.xlabel('Epoch')
+    plt.ylabel('Score')
+    plt.legend()
+    plt.title('Validation Metrics')
+    
+    plt.subplot(1, 3, 3)
+    plt.plot(val_precisions, label='Precision')
+    plt.plot(val_recalls, label='Recall')
+    plt.xlabel('Epoch')
+    plt.ylabel('Score')
+    plt.legend()
+    plt.title('Precision and Recall')
+    
+    plt.tight_layout()
+    plt.savefig('bert_training_history.png')
+    plt.close()
+
 def train_model():
     # Load and preprocess data with different encoding
     try:
@@ -61,6 +107,7 @@ def train_model():
     # Encode labels
     le = LabelEncoder()
     labels = le.fit_transform(df['Review Type'])
+    class_names = le.classes_
     
     # Split data
     abstracts_train, abstracts_val, labels_train, labels_val = train_test_split(
@@ -88,6 +135,18 @@ def train_model():
     optimizer = torch.optim.AdamW(model.parameters(), lr=2e-5)
     num_epochs = 10
 
+    # Lists to store metrics for plotting
+    train_losses = []
+    val_losses = []
+    val_accuracies = []
+    val_f1s = []
+    val_precisions = []
+    val_recalls = []
+    
+    print(f"Starting BERT model training with model: bert-base-uncased")
+    print(f"Max Length: 512, Batch Size: 8")
+    print(f"Learning Rate: 2e-5, Epochs: {num_epochs}")
+    
     # Training loop
     for epoch in range(num_epochs):
         model.train()
@@ -112,10 +171,15 @@ def train_model():
             loss.backward()
             optimizer.step()
 
+        # Calculate average loss for this epoch
+        avg_train_loss = total_loss / len(train_loader)
+        train_losses.append(avg_train_loss)
+        
         # Validation
         model.eval()
-        val_accuracy = 0
-        val_steps = 0
+        val_loss = 0
+        all_predictions = []
+        all_labels = []
         
         with torch.no_grad():
             for batch in val_loader:
@@ -125,19 +189,86 @@ def train_model():
 
                 outputs = model(
                     input_ids=input_ids,
-                    attention_mask=attention_mask
+                    attention_mask=attention_mask,
+                    labels=labels
                 )
-
+                
+                val_loss += outputs.loss.item()
                 predictions = torch.argmax(outputs.logits, dim=1)
-                val_accuracy += (predictions == labels).sum().item()
-                val_steps += labels.size(0)
+                
+                all_predictions.extend(predictions.cpu().numpy())
+                all_labels.extend(labels.cpu().numpy())
 
-        avg_train_loss = total_loss / len(train_loader)
-        avg_val_accuracy = val_accuracy / val_steps
+        # Calculate validation loss
+        avg_val_loss = val_loss / len(val_loader)
+        val_losses.append(avg_val_loss)
+        
+        # Calculate evaluation metrics
+        accuracy = np.mean(np.array(all_predictions) == np.array(all_labels))
+        precision, recall, f1, _ = precision_recall_fscore_support(
+            all_labels, all_predictions, average='weighted'
+        )
+        
+        # Store metrics for plotting
+        val_accuracies.append(accuracy)
+        val_f1s.append(f1)
+        val_precisions.append(precision)
+        val_recalls.append(recall)
+        
+        print(f'Epoch {epoch + 1}/{num_epochs}:')
+        print(f'  Training Loss: {avg_train_loss:.4f}')
+        print(f'  Validation Loss: {avg_val_loss:.4f}')
+        print(f'  Validation Accuracy: {accuracy:.4f}')
+        print(f'  Validation F1 Score: {f1:.4f}')
+        print(f'  Validation Precision: {precision:.4f}')
+        print(f'  Validation Recall: {recall:.4f}')
 
-        print(f'Average training loss: {avg_train_loss:.4f}')
-        print(f'Validation Accuracy: {avg_val_accuracy:.4f}')
+    # Plot training history
+    plot_training_history(train_losses, val_losses, val_accuracies, val_f1s, val_precisions, val_recalls)
+    
+    # Final evaluation
+    model.eval()
+    all_predictions = []
+    all_labels = []
+    
+    with torch.no_grad():
+        for batch in val_loader:
+            input_ids = batch['input_ids'].to(device)
+            attention_mask = batch['attention_mask'].to(device)
+            labels = batch['labels'].to(device)
 
+            outputs = model(
+                input_ids=input_ids,
+                attention_mask=attention_mask
+            )
+
+            predictions = torch.argmax(outputs.logits, dim=1)
+            
+            all_predictions.extend(predictions.cpu().numpy())
+            all_labels.extend(labels.cpu().numpy())
+    
+    # Plot confusion matrix
+    plot_confusion_matrix(all_labels, all_predictions, class_names)
+    
+    # Generate classification report
+    report = classification_report(all_labels, all_predictions, 
+                                 target_names=class_names, output_dict=True)
+    
+    print("\nFinal Evaluation Results:")
+    print("=" * 50)
+    for cls in class_names:
+        print(f"{cls}: F1={report[cls]['f1-score']:.4f}, "
+              f"Precision={report[cls]['precision']:.4f}, "
+              f"Recall={report[cls]['recall']:.4f}")
+    
+    print(f"\nOverall: F1={report['weighted avg']['f1-score']:.4f}, "
+          f"Accuracy={report['accuracy']:.4f}")
+    print("=" * 50)
+    
+    print("\nBERT Performance Summary:")
+    print(f"BERT weighted F1-score: {report['weighted avg']['f1-score']:.4f}")
+    print(f"BERT accuracy: {report['accuracy']:.4f}")
+    
     return model, tokenizer, le
 
 if __name__ == "__main__":
@@ -147,36 +278,101 @@ if __name__ == "__main__":
     model.save_pretrained('./review_classifier')
     tokenizer.save_pretrained('./review_classifier')
 
+    print("\nTraining and evaluation complete. Model saved to ./review_classifier")
+    print("Visualization files saved: bert_training_history.png, bert_confusion_matrix.png")
 
-    """
-    Epoch 1/10: 100%|██████████| 25/25 [00:17<00:00,  1.42it/s]
-Average training loss: 1.0102
-Validation Accuracy: 0.5400
-Epoch 2/10: 100%|██████████| 25/25 [00:17<00:00,  1.40it/s]
-Average training loss: 0.8119
-Validation Accuracy: 0.5800
-Epoch 3/10: 100%|██████████| 25/25 [00:18<00:00,  1.37it/s]
-Average training loss: 0.6088
-Validation Accuracy: 0.6400
-Epoch 4/10: 100%|██████████| 25/25 [00:18<00:00,  1.36it/s]
-Average training loss: 0.4091
-Validation Accuracy: 0.6800
-Epoch 5/10: 100%|██████████| 25/25 [00:18<00:00,  1.37it/s]
-Average training loss: 0.2837
-Validation Accuracy: 0.6400
-Epoch 6/10: 100%|██████████| 25/25 [00:18<00:00,  1.38it/s]
-Average training loss: 0.2050
-Validation Accuracy: 0.6400
-Epoch 7/10: 100%|██████████| 25/25 [00:18<00:00,  1.37it/s]
-Average training loss: 0.1334
-Validation Accuracy: 0.6200
-Epoch 8/10: 100%|██████████| 25/25 [00:18<00:00,  1.37it/s]
-Average training loss: 0.1043
-Validation Accuracy: 0.6400
-Epoch 9/10: 100%|██████████| 25/25 [00:18<00:00,  1.37it/s]
-Average training loss: 0.0824
-Validation Accuracy: 0.6400
-Epoch 10/10: 100%|██████████| 25/25 [00:18<00:00,  1.38it/s]
-Average training loss: 0.0720
-Validation Accuracy: 0.6600
-    """
+"""
+Epoch 1/10: 100%|██████████| 25/25 [00:17<00:00,  1.39it/s]
+Epoch 1/10:
+  Training Loss: 1.0102
+  Validation Loss: 0.9068
+  Validation Accuracy: 0.5400
+  Validation F1 Score: 0.4594
+  Validation Precision: 0.6300
+  Validation Recall: 0.5400
+Epoch 2/10: 100%|██████████| 25/25 [00:17<00:00,  1.44it/s]
+Epoch 2/10:
+  Training Loss: 0.8119
+  Validation Loss: 0.7632
+  Validation Accuracy: 0.5800
+  Validation F1 Score: 0.5908
+  Validation Precision: 0.6070
+  Validation Recall: 0.5800
+Epoch 3/10: 100%|██████████| 25/25 [00:17<00:00,  1.41it/s]
+Epoch 3/10:
+  Training Loss: 0.6087
+  Validation Loss: 0.6122
+  Validation Accuracy: 0.6400
+  Validation F1 Score: 0.6300
+  Validation Precision: 0.6249
+  Validation Recall: 0.6400
+Epoch 4/10: 100%|██████████| 25/25 [00:18<00:00,  1.38it/s]
+Epoch 4/10:
+  Training Loss: 0.4088
+  Validation Loss: 0.5565
+  Validation Accuracy: 0.6800
+  Validation F1 Score: 0.6621
+  Validation Precision: 0.6602
+  Validation Recall: 0.6800
+Epoch 5/10: 100%|██████████| 25/25 [00:18<00:00,  1.36it/s]
+Epoch 5/10:
+  Training Loss: 0.2826
+  Validation Loss: 0.5974
+  Validation Accuracy: 0.6200
+  Validation F1 Score: 0.6254
+  Validation Precision: 0.6394
+  Validation Recall: 0.6200
+Epoch 6/10: 100%|██████████| 25/25 [00:18<00:00,  1.33it/s]
+Epoch 6/10:
+  Training Loss: 0.2037
+  Validation Loss: 0.6484
+  Validation Accuracy: 0.6200
+  Validation F1 Score: 0.6200
+  Validation Precision: 0.6200
+  Validation Recall: 0.6200
+Epoch 7/10: 100%|██████████| 25/25 [00:18<00:00,  1.32it/s]
+Epoch 7/10:
+  Training Loss: 0.1378
+  Validation Loss: 0.7243
+  Validation Accuracy: 0.6200
+  Validation F1 Score: 0.6200
+  Validation Precision: 0.6220
+  Validation Recall: 0.6200
+Epoch 8/10: 100%|██████████| 25/25 [00:18<00:00,  1.35it/s]
+Epoch 8/10:
+  Training Loss: 0.1040
+  Validation Loss: 0.7599
+  Validation Accuracy: 0.6400
+  Validation F1 Score: 0.6457
+  Validation Precision: 0.6536
+  Validation Recall: 0.6400
+Epoch 9/10: 100%|██████████| 25/25 [00:18<00:00,  1.35it/s]
+Epoch 9/10:
+  Training Loss: 0.0814
+  Validation Loss: 0.7533
+  Validation Accuracy: 0.6400
+  Validation F1 Score: 0.6457
+  Validation Precision: 0.6536
+  Validation Recall: 0.6400
+Epoch 10/10: 100%|██████████| 25/25 [00:18<00:00,  1.34it/s]
+Epoch 10/10:
+  Training Loss: 0.0724
+  Validation Loss: 0.7508
+  Validation Accuracy: 0.6800
+  Validation F1 Score: 0.6776
+  Validation Precision: 0.6759
+  Validation Recall: 0.6800
+
+Final Evaluation Results:
+==================================================
+AI-Generated: F1=0.9231, Precision=0.9231, Recall=0.9231
+Authentic: F1=0.6809, Precision=0.6667, Recall=0.6957
+Generic: F1=0.4444, Precision=0.4615, Recall=0.4286
+
+Overall: F1=0.6776, Accuracy=0.6800
+==================================================
+
+BERT Performance Summary:
+BERT weighted F1-score: 0.6776
+BERT accuracy: 0.6800
+"""
