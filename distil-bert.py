@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -16,6 +17,13 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import classification_report, confusion_matrix, precision_recall_fscore_support
 from tqdm.auto import tqdm
+import warnings
+
+# Suppress warnings for cleaner output
+warnings.filterwarnings("ignore")
+
+# Fix for NumPy compatibility in Google Colab
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 # Configuration
 MODEL_NAME = "distilbert-base-uncased"  # Efficient baseline model
@@ -27,6 +35,7 @@ NUM_EPOCHS = 10
 # Set random seed for reproducibility
 torch.manual_seed(42)
 np.random.seed(42)
+
 
 def plot_confusion_matrix(y_true, y_pred, class_names):
     cm = confusion_matrix(y_true, y_pred)
@@ -40,9 +49,10 @@ def plot_confusion_matrix(y_true, y_pred, class_names):
     plt.savefig('distilbert_confusion_matrix.png')
     plt.close()
 
+
 def plot_training_history(history):
     plt.figure(figsize=(15, 5))
-    
+
     plt.subplot(1, 3, 1)
     plt.plot(history['train_loss'], label='Training Loss')
     plt.plot(history['eval_loss'], label='Validation Loss')
@@ -50,7 +60,7 @@ def plot_training_history(history):
     plt.ylabel('Loss')
     plt.legend()
     plt.title('Training and Validation Loss')
-    
+
     plt.subplot(1, 3, 2)
     plt.plot(history['eval_accuracy'], label='Accuracy')
     plt.plot(history['eval_f1'], label='F1 Score')
@@ -58,7 +68,7 @@ def plot_training_history(history):
     plt.ylabel('Score')
     plt.legend()
     plt.title('Validation Metrics')
-    
+
     plt.subplot(1, 3, 3)
     plt.plot(history['eval_precision'], label='Precision')
     plt.plot(history['eval_recall'], label='Recall')
@@ -66,17 +76,19 @@ def plot_training_history(history):
     plt.ylabel('Score')
     plt.legend()
     plt.title('Precision and Recall')
-    
+
     plt.tight_layout()
     plt.savefig('distilbert_training_history.png')
     plt.close()
 
 # Load and preprocess data
+
+
 def load_data(file_path):
     # Try multiple encodings
     encodings = ['cp1252', 'latin-1', 'utf-8']
     df = None
-    
+
     for encoding in encodings:
         try:
             df = pd.read_csv(file_path, encoding=encoding)
@@ -85,49 +97,53 @@ def load_data(file_path):
             continue
         except Exception as e:
             print(f"Error with {encoding} encoding: {e}")
-    
+
     if df is None:
         df = pd.read_csv(file_path, encoding='utf-8', errors='replace')
-    
+
     # Handle missing values and clean text
     df = df.fillna({'Paper Title': '', 'Abstract': '', 'Review Text': ''})
-    
+
     # Clean text
     for col in ['Paper Title', 'Abstract', 'Review Text']:
-        df[col] = df[col].apply(lambda x: str(x).encode('ascii', 'ignore').decode('ascii'))
-    
+        df[col] = df[col].apply(lambda x: str(x).encode(
+            'ascii', 'ignore').decode('ascii'))
+
     # Combine text features
     df['text'] = (
-        "Title: " + df['Paper Title'] + 
-        " Abstract: " + df['Abstract'] + 
+        "Title: " + df['Paper Title'] +
+        " Abstract: " + df['Abstract'] +
         " Review: " + df['Review Text']
     )
-    
+
     # Drop rows with missing values
     df = df.dropna(subset=['text', 'Review Type'])
-    
+
     # Encode labels
     label_encoder = LabelEncoder()
     df['label'] = label_encoder.fit_transform(df['Review Type'])
-    
+
     return df[['text', 'label']], label_encoder.classes_
 
 # Compute metrics for evaluation
+
+
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
     predictions = np.argmax(logits, axis=-1)
-    
+
     precision, recall, f1, _ = precision_recall_fscore_support(
         labels, predictions, average='weighted'
     )
     accuracy = (predictions == labels).mean()
-    
+
     return {
         "accuracy": accuracy,
         "f1": f1,
         "precision": precision,
         "recall": recall
     }
+
 
 def main():
     print(f"Starting DistilBERT model training with model: {MODEL_NAME}")
@@ -136,17 +152,20 @@ def main():
 
     # Load your dataset
     print("Loading and preprocessing data...")
-    df, class_names = load_data("corpus.csv")
-    print(f"Loaded {len(df)} samples with {len(class_names)} classes: {class_names}")
+    df, class_names = load_data("corpus-final.csv")
+    print(
+        f"Loaded {len(df)} samples with {len(class_names)} classes: {class_names}")
 
     # Split data
-    train_df, temp_df = train_test_split(df, test_size=0.3, stratify=df['label'], random_state=42)
-    val_df, test_df = train_test_split(temp_df, test_size=0.5, stratify=temp_df['label'], random_state=42)
+    train_df, temp_df = train_test_split(
+        df, test_size=0.3, stratify=df['label'], random_state=42)
+    val_df, test_df = train_test_split(
+        temp_df, test_size=0.5, stratify=temp_df['label'], random_state=42)
 
-    # Create Hugging Face datasets
-    train_dataset = Dataset.from_pandas(train_df)
-    val_dataset = Dataset.from_pandas(val_df)
-    test_dataset = Dataset.from_pandas(test_df)
+    # Create Hugging Face datasets with explicit casting
+    train_dataset = Dataset.from_pandas(train_df.reset_index(drop=True))
+    val_dataset = Dataset.from_pandas(val_df.reset_index(drop=True))
+    test_dataset = Dataset.from_pandas(test_df.reset_index(drop=True))
 
     # Initialize tokenizer
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
@@ -160,16 +179,32 @@ def main():
             truncation=True,
         )
 
-    # Tokenize datasets
+    # Tokenize datasets with proper error handling
     print("Tokenizing datasets...")
-    train_dataset = train_dataset.map(tokenize_function, batched=True)
-    val_dataset = val_dataset.map(tokenize_function, batched=True)
-    test_dataset = test_dataset.map(tokenize_function, batched=True)
+    try:
+        train_dataset = train_dataset.map(
+            tokenize_function, batched=True, remove_columns=['text'])
+        val_dataset = val_dataset.map(
+            tokenize_function, batched=True, remove_columns=['text'])
+        test_dataset = test_dataset.map(
+            tokenize_function, batched=True, remove_columns=['text'])
+    except Exception as e:
+        print(f"Error during tokenization: {e}")
+        # Fallback tokenization without batching
+        train_dataset = train_dataset.map(
+            tokenize_function, batched=False, remove_columns=['text'])
+        val_dataset = val_dataset.map(
+            tokenize_function, batched=False, remove_columns=['text'])
+        test_dataset = test_dataset.map(
+            tokenize_function, batched=False, remove_columns=['text'])
 
-    # Convert to torch format
-    train_dataset.set_format(type='torch', columns=['input_ids', 'attention_mask', 'label'])
-    val_dataset.set_format(type='torch', columns=['input_ids', 'attention_mask', 'label'])
-    test_dataset.set_format(type='torch', columns=['input_ids', 'attention_mask', 'label'])
+    # Convert to torch format with explicit column selection
+    train_dataset = train_dataset.with_format(
+        "torch", columns=['input_ids', 'attention_mask', 'label'])
+    val_dataset = val_dataset.with_format(
+        "torch", columns=['input_ids', 'attention_mask', 'label'])
+    test_dataset = test_dataset.with_format(
+        "torch", columns=['input_ids', 'attention_mask', 'label'])
 
     # Load model with proper class labels
     model = AutoModelForSequenceClassification.from_pretrained(
@@ -182,7 +217,7 @@ def main():
     # Training arguments
     training_args = TrainingArguments(
         output_dir="./distilbert_results",
-        evaluation_strategy="epoch",
+        eval_strategy="epoch",  # Updated parameter name
         save_strategy="epoch",
         learning_rate=LEARNING_RATE,
         per_device_train_batch_size=BATCH_SIZE,
@@ -195,7 +230,7 @@ def main():
         logging_dir="./logs",
         logging_strategy="steps",
         logging_steps=10,
-        report_to="tensorboard",
+        report_to="none",  # Disable TensorBoard reporting
     )
 
     # Initialize Trainer
@@ -211,7 +246,7 @@ def main():
     # Train model
     print("Starting training...")
     train_results = trainer.train()
-    
+
     # Get training history
     history = {
         'train_loss': [],
@@ -221,7 +256,7 @@ def main():
         'eval_precision': [],
         'eval_recall': []
     }
-    
+
     for log in trainer.state.log_history:
         if 'loss' in log and 'epoch' in log and 'eval_loss' not in log:
             history['train_loss'].append(log['loss'])
@@ -231,7 +266,7 @@ def main():
             history['eval_f1'].append(log['eval_f1'])
             history['eval_precision'].append(log['eval_precision'])
             history['eval_recall'].append(log['eval_recall'])
-            
+
             # Print epoch results
             epoch = int(log['epoch'])
             print(f"Epoch {epoch}:")
@@ -241,7 +276,7 @@ def main():
             print(f"  Validation F1 Score: {log['eval_f1']:.4f}")
             print(f"  Validation Precision: {log['eval_precision']:.4f}")
             print(f"  Validation Recall: {log['eval_recall']:.4f}")
-    
+
     # Plot training history
     plot_training_history(history)
 
@@ -252,46 +287,47 @@ def main():
     for metric, value in test_results.items():
         if metric.startswith('eval_'):
             print(f"  {metric[5:]}: {value:.4f}")
-    
+
     # Get detailed metrics by class
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model.to(device)
     model.eval()
-    
+
     all_predictions = []
     all_labels = []
-    
+
     for batch in tqdm(trainer.get_eval_dataloader(test_dataset), desc="Detailed evaluation"):
         batch = {k: v.to(device) for k, v in batch.items()}
-        
+
         with torch.no_grad():
             outputs = model(**batch)
-        
+
         predictions = torch.argmax(outputs.logits, dim=1)
-        
+
         all_predictions.extend(predictions.cpu().numpy())
         all_labels.extend(batch["labels"].cpu().numpy())
-    
+
     # Plot confusion matrix
     plot_confusion_matrix(all_labels, all_predictions, class_names)
-    
+
     # Generate classification report
-    report = classification_report(all_labels, all_predictions, 
-                                  target_names=class_names, output_dict=True)
-    
+    report = classification_report(all_labels, all_predictions,
+                                   target_names=class_names, output_dict=True)
+
     print("\nFinal Evaluation Results:")
     print("=" * 50)
     for cls in class_names:
         print(f"{cls}: F1={report[cls]['f1-score']:.4f}, "
               f"Precision={report[cls]['precision']:.4f}, "
               f"Recall={report[cls]['recall']:.4f}")
-    
+
     print(f"\nOverall: F1={report['weighted avg']['f1-score']:.4f}, "
           f"Accuracy={report['accuracy']:.4f}")
     print("=" * 50)
-    
+
     print("\nDistilBERT Performance Summary:")
-    print(f"DistilBERT weighted F1-score: {report['weighted avg']['f1-score']:.4f}")
+    print(
+        f"DistilBERT weighted F1-score: {report['weighted avg']['f1-score']:.4f}")
     print(f"DistilBERT accuracy: {report['accuracy']:.4f}")
 
     # Save model
@@ -300,6 +336,7 @@ def main():
 
     print("\nTraining and evaluation complete. Model saved to ./distilbert_classifier")
     print("Visualization files saved: distilbert_training_history.png, distilbert_confusion_matrix.png")
+
 
 if __name__ == "__main__":
     main()
@@ -393,4 +430,55 @@ DistilBERT accuracy: 0.7632
 Training and evaluation complete. Model saved to ./distilbert_classifier
 Visualization files saved: distilbert_training_history.png, distilbert_confusion_matrix.png
 \nEpoch   Training Loss   Validation Loss Accuracy    F1\n1   1.083400    1.009396    0.459459    0.289289\n2   0.977400    0.909536    0.459459    0.289289\n3   0.893200    0.767690    0.675676    0.644673\n4   0.744200    0.663561    0.756757    0.729066\n5   0.623800    0.605594    0.702703    0.682436\n6   0.527500    0.597340    0.648649    0.642523\n [3/3 00:00]\nTest results: {'eval_loss': 0.7004138827323914, 'eval_accuracy': 0.6842105263157895, 'eval_f1': 0.6605263157894736, 'eval_runtime': 0.2194, 'eval_samples_per_second': 173.2, 'eval_steps_per_second': 13.674, 'epoch': 6.0}\n
+"""
+
+"""
+Epoch 1:
+  Training Loss: 1.0368
+  Validation Loss: 0.9251
+  Validation Accuracy: 0.5192
+  Validation F1 Score: 0.3549
+  Validation Precision: 0.2696
+  Validation Recall: 0.5192
+Epoch 2:
+  Training Loss: 0.9028
+  Validation Loss: 0.8053
+  Validation Accuracy: 0.6923
+  Validation F1 Score: 0.6204
+  Validation Precision: 0.8068
+  Validation Recall: 0.6923
+Epoch 3:
+  Training Loss: 0.8055
+  Validation Loss: 0.7221
+  Validation Accuracy: 0.6538
+  Validation F1 Score: 0.5409
+  Validation Precision: 0.4846
+  Validation Recall: 0.6538
+Epoch 4:
+  Training Loss: 0.7183
+  Validation Loss: 0.7256
+  Validation Accuracy: 0.6538
+  Validation F1 Score: 0.6110
+  Validation Precision: 0.6116
+  Validation Recall: 0.6538
+
+Evaluating on test set...
+ [4/4 00:00]
+Test results:
+  loss: 0.7808
+  accuracy: 0.6154
+  f1: 0.5283
+  precision: 0.5872
+  recall: 0.6154
+  runtime: 0.2452
+  samples_per_second: 212.0840
+  steps_per_second: 16.3140
+Detailed evaluation: 100%
+ 4/4 [00:00<00:00, 14.62it/s]
+
+Final Evaluation Results:
+==================================================
+AI-Generated: F1=0.6154, Precision=1.0000, Recall=0.4444
+Authentic: F1=0.7500, Precision=0.6000, Recall=1.0000
+Generic: F1=0.1053, Precision=0.3333, Recall=0.0625
 """

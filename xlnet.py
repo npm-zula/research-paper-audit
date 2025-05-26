@@ -38,9 +38,9 @@ MODEL_NAME = "xlnet-base-cased"  # XLNet base model
 MAX_LENGTH = 512  # Max context length
 BATCH_SIZE = 8  # Smaller batch size with gradient accumulation
 GRADIENT_ACCUMULATION_STEPS = 4  # Effectively gives us batch size of 32
-LEARNING_RATE = 2e-5
-NUM_EPOCHS = 15
-WEIGHT_DECAY = 0.01
+LEARNING_RATE = 1.5e-5  # Adjusted learning rate
+NUM_EPOCHS = 10  # Adjusted number of epochs
+WEIGHT_DECAY = 0.05  # Adjusted weight decay
 WARMUP_RATIO = 0.1
 CROSS_VAL_FOLDS = 3
 
@@ -121,35 +121,95 @@ def compute_metrics(eval_pred):
         "recall": recall
     }
 
+def process_log_history_for_plotting(log_history):
+    """
+    Processes the trainer.state.log_history to extract epoch-wise metrics
+    for plotting.
+    """
+    processed_history = {
+        'train_epochs': [], 'train_loss': [],
+        'eval_epochs': [], 'eval_loss': [], 'eval_accuracy': [], 'eval_f1': [],
+        'eval_precision': [], 'eval_recall': []
+    }
+    temp_train_losses_for_epoch = {}  # epoch_float -> list of losses
+
+    for log in log_history:
+        epoch = log.get('epoch')
+        if epoch is None:
+            continue
+
+        # Check if it's a training log (has 'loss' but not 'eval_loss')
+        if 'loss' in log and 'eval_loss' not in log:
+            if epoch not in temp_train_losses_for_epoch:
+                temp_train_losses_for_epoch[epoch] = []
+            temp_train_losses_for_epoch[epoch].append(log['loss'])
+        
+        # Check if it's an evaluation log (has 'eval_loss')
+        elif 'eval_loss' in log:
+            processed_history['eval_epochs'].append(epoch)
+            processed_history['eval_loss'].append(log['eval_loss'])
+            processed_history['eval_accuracy'].append(log.get('eval_accuracy')) # Use .get for safety
+            processed_history['eval_f1'].append(log.get('eval_f1'))
+            processed_history['eval_precision'].append(log.get('eval_precision'))
+            processed_history['eval_recall'].append(log.get('eval_recall'))
+
+    # Average training losses for each epoch it was logged
+    # Sort epochs to ensure chronological order for plotting training loss
+    sorted_train_epochs = sorted(temp_train_losses_for_epoch.keys())
+    for epoch in sorted_train_epochs:
+        if temp_train_losses_for_epoch[epoch]: # Ensure there are losses to average
+            processed_history['train_epochs'].append(epoch)
+            processed_history['train_loss'].append(np.mean(temp_train_losses_for_epoch[epoch]))
+            
+    # Ensure all eval metrics lists are of the same length as eval_epochs
+    # This handles cases where a metric might be missing from a log entry
+    # (though unlikely with Hugging Face Trainer standard logging)
+    len_eval_epochs = len(processed_history['eval_epochs'])
+    for key in ['eval_loss', 'eval_accuracy', 'eval_f1', 'eval_precision', 'eval_recall']:
+        if len(processed_history[key]) != len_eval_epochs:
+            # This case should ideally not happen with standard trainer logs.
+            # If it does, it indicates an issue with log contents or parsing.
+            # For robustness, one might pad with np.nan or filter,
+            # but for now, we assume consistent logging from Trainer.
+            pass # Or print a warning
+
+    return processed_history
+
 def plot_training_history(history):
-    plt.figure(figsize=(15, 5))
+    plt.figure(figsize=(20, 6))  # Adjusted figure size
     
     plt.subplot(1, 3, 1)
-    plt.plot(history['train_loss'], label='Training Loss')
-    plt.plot(history['eval_loss'], label='Validation Loss')
+    if history['train_epochs'] and history['train_loss']: # Check if data exists
+        plt.plot(history['train_epochs'], history['train_loss'], label='Training Loss', marker='o')
+    if history['eval_epochs'] and history['eval_loss']: # Check if data exists
+        plt.plot(history['eval_epochs'], history['eval_loss'], label='Validation Loss', marker='o')
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
     plt.legend()
     plt.title('Training and Validation Loss')
     
     plt.subplot(1, 3, 2)
-    plt.plot(history['eval_accuracy'], label='Accuracy')
-    plt.plot(history['eval_f1'], label='F1 Score')
+    if history['eval_epochs'] and history['eval_accuracy']: # Check if data exists
+        plt.plot(history['eval_epochs'], history['eval_accuracy'], label='Accuracy', marker='o')
+    if history['eval_epochs'] and history['eval_f1']: # Check if data exists
+        plt.plot(history['eval_epochs'], history['eval_f1'], label='F1 Score', marker='o')
     plt.xlabel('Epoch')
     plt.ylabel('Score')
     plt.legend()
     plt.title('Validation Metrics')
     
     plt.subplot(1, 3, 3)
-    plt.plot(history['eval_precision'], label='Precision')
-    plt.plot(history['eval_recall'], label='Recall')
+    if history['eval_epochs'] and history['eval_precision']: # Check if data exists
+        plt.plot(history['eval_epochs'], history['eval_precision'], label='Precision', marker='o')
+    if history['eval_epochs'] and history['eval_recall']: # Check if data exists
+        plt.plot(history['eval_epochs'], history['eval_recall'], label='Recall', marker='o')
     plt.xlabel('Epoch')
     plt.ylabel('Score')
     plt.legend()
     plt.title('Precision and Recall')
     
     plt.tight_layout()
-    plt.savefig('xlnet_training_history.png')
+    plt.savefig('xlnet_training_history_corrected.png') # Changed filename
     plt.close()
 
 def plot_confusion_matrix(y_true, y_pred, class_names):
@@ -207,7 +267,7 @@ def explain_prediction(text, model, tokenizer, class_names, device):
 
 def train_model_with_cv():
     print("Loading data...")
-    df, class_names = load_data('/content/corpus.csv')
+    df, class_names = load_data('/corpus/corpus-final.csv') # Updated dataset path to be absolute
     print(f"Loaded {len(df)} samples with {len(class_names)} classes: {class_names}")
     
     tokenizer = XLNetTokenizer.from_pretrained(MODEL_NAME)
@@ -215,12 +275,23 @@ def train_model_with_cv():
     skf = StratifiedKFold(n_splits=CROSS_VAL_FOLDS, shuffle=True, random_state=SEED)
     
     fold_results = []
-    best_model = None
+    best_model_state_dict = None # Store state_dict instead of the whole model object for memory efficiency
     best_tokenizer = None
     best_f1 = 0.0
+    best_fold_log_history = None # To store log_history of the best fold
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using device: {device}")
+    
+    # Store training history (not used directly for plotting anymore, but kept for averages)
+    aggregated_training_history = {
+        'train_loss': [],
+        'eval_loss': [],
+        'eval_accuracy': [],
+        'eval_f1': [],
+        'eval_precision': [],
+        'eval_recall': []
+    }
     
     for fold, (train_idx, val_idx) in enumerate(skf.split(df, df['label'])):
         print(f"\n{'='*50}\nTraining Fold {fold+1}/{CROSS_VAL_FOLDS}\n{'='*50}")
@@ -256,8 +327,10 @@ def train_model_with_cv():
         
         training_args = TrainingArguments(
             output_dir=f"./results/xlnet-fold-{fold+1}",
-            evaluation_strategy="epoch",
-            save_strategy="epoch",
+            evaluation_strategy="steps", # Was eval_strategy, ensuring correct param name and value
+            save_strategy="steps",       # Match evaluation_strategy
+            eval_steps=10,             # Match logging_steps for frequent evaluation
+            save_steps=10,             # Match eval_steps
             learning_rate=LEARNING_RATE,
             per_device_train_batch_size=BATCH_SIZE,
             per_device_eval_batch_size=BATCH_SIZE * 2,
@@ -272,7 +345,8 @@ def train_model_with_cv():
             logging_steps=10,
             report_to="tensorboard",
             warmup_steps=num_warmup_steps,
-            seed=SEED
+            seed=SEED,
+            save_total_limit=3  # Limit the number of checkpoints saved
         )
         
         trainer = Trainer(
@@ -281,25 +355,37 @@ def train_model_with_cv():
             train_dataset=train_dataset,
             eval_dataset=val_dataset,
             compute_metrics=compute_metrics,
-            callbacks=[EarlyStoppingCallback(early_stopping_patience=3)],
+            callbacks=[EarlyStoppingCallback(early_stopping_patience=2)], # Adjusted patience
         )
         
         print("Training model...")
-        trainer.train()
+        train_result = trainer.train()
+        eval_result = trainer.evaluate() # This re-evaluates the best model loaded by EarlyStopping
         
-        print("Evaluating model...")
-        eval_results = trainer.evaluate()
-        fold_results.append(eval_results)
+        # Store results for this fold
+        fold_results.append(eval_result)
+        
+        # Update aggregated training history (for average reporting)
+        # Note: train_result.training_loss is the average training loss over all epochs for this fold.
+        # For detailed epoch-wise loss, we use trainer.state.log_history below.
+        aggregated_training_history['train_loss'].append(train_result.training_loss if train_result.training_loss is not None else np.nan)
+        aggregated_training_history['eval_loss'].append(eval_result['eval_loss'])
+        aggregated_training_history['eval_accuracy'].append(eval_result['eval_accuracy'])
+        aggregated_training_history['eval_f1'].append(eval_result['eval_f1'])
+        aggregated_training_history['eval_precision'].append(eval_result['eval_precision'])
+        aggregated_training_history['eval_recall'].append(eval_result['eval_recall'])
         
         print(f"Fold {fold+1} results:")
-        for metric, value in eval_results.items():
+        for metric, value in eval_result.items():
             print(f"{metric}: {value:.4f}")
         
-        if eval_results['eval_f1'] > best_f1:
-            best_f1 = eval_results['eval_f1']
-            best_model = model
+        if eval_result['eval_f1'] > best_f1:
+            best_f1 = eval_result['eval_f1']
+            # Save model state_dict to save memory, especially in Colab
+            best_model_state_dict = model.state_dict()
             best_tokenizer = tokenizer
-            print(f"New best model found with F1: {best_f1:.4f}")
+            best_fold_log_history = trainer.state.log_history # Capture log history for the best fold
+            print(f"New best model found with F1: {best_f1:.4f} in fold {fold+1}")
     
     avg_results = {}
     for metric in fold_results[0].keys():
@@ -309,11 +395,35 @@ def train_model_with_cv():
     for metric, value in avg_results.items():
         print(f"{metric}: {value:.4f}")
     
-    print("\nSaving best model...")
-    best_model.save_pretrained("./xlnet_classifier")
-    best_tokenizer.save_pretrained("./xlnet_classifier")
-    
-    return best_model, best_tokenizer, class_names
+    # Reconstruct the best model from state_dict
+    if best_model_state_dict:
+        print("\nLoading best model from state_dict...")
+        # Need to initialize a model instance first
+        final_model = XLNetForSequenceClassification.from_pretrained(
+            MODEL_NAME,
+            num_labels=len(class_names),
+            id2label={i: label for i, label in enumerate(class_names)},
+            label2id={label: i for i, label in enumerate(class_names)}
+        )
+        final_model.load_state_dict(best_model_state_dict)
+        final_model.to(device) # Ensure it's on the correct device
+        print("Saving best model...")
+        final_model.save_pretrained("./xlnet_classifier")
+        best_tokenizer.save_pretrained("./xlnet_classifier")
+    else:
+        print("No best model state_dict found. Training might have failed or produced no improvements.")
+        return None, None, class_names # Or handle error appropriately
+
+    # Plot training history using the logs from the best fold
+    if best_fold_log_history:
+        print("Processing log history for plotting...")
+        plot_data = process_log_history_for_plotting(best_fold_log_history)
+        print("Plotting training history of the best fold...")
+        plot_training_history(plot_data)
+    else:
+        print("No log history found for the best fold to plot.")
+        
+    return final_model, best_tokenizer, class_names
 
 if __name__ == "__main__":
     print(f"Starting XLNet model training with {CROSS_VAL_FOLDS}-fold cross-validation")
@@ -323,8 +433,13 @@ if __name__ == "__main__":
     
     model, tokenizer, class_names = train_model_with_cv()
     
+    if model is None or tokenizer is None:
+        print("Model training failed or no best model was identified. Exiting.")
+        # Consider exiting or raising an error
+        exit()
+        
     print("\nPerforming final evaluation on test set...")
-    test_df, _ = load_data('corpus.csv')
+    test_df, _ = load_data('/content/corpus-final.csv') # Updated dataset path
     _, test_df = train_test_split(test_df, test_size=0.2, stratify=test_df['label'],
                                  random_state=SEED)
     
@@ -387,7 +502,7 @@ if __name__ == "__main__":
         print(f"  {word}: {importance:.4f}")
     
     print("\nTraining and evaluation complete. Model saved to ./xlnet_classifier")
-    print("Visualization files saved: xlnet_training_history.png, xlnet_confusion_matrix.png")
+    print("Visualization files saved: xlnet_training_history_corrected.png, xlnet_confusion_matrix.png")
     
     # Compare with RoBERTa results
     print("\nXLNet vs RoBERTa Performance Comparison:")
@@ -408,4 +523,14 @@ eval_runtime: 6.6263
 eval_samples_per_second: 12.5257
 eval_steps_per_second: 0.9053
 epoch: 10.5238
+    """
+
+    """
+    Test Set Performance:
+AI-Generated: F1=0.9091, Precision=1.0000, Recall=0.8333
+Authentic: F1=0.7500, Precision=0.6818, Recall=0.8333
+Generic: F1=0.4737, Precision=0.5625, Recall=0.4091
+
+Overall: F1=0.6904, Accuracy=0.7000
+
     """
