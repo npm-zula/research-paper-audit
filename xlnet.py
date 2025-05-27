@@ -217,7 +217,7 @@ def explain_prediction(text, model, tokenizer, class_names, device):
 
 def train_model_with_cv():
     print("Loading data...")
-    df, class_names = load_data('/content/corpus.csv')
+    df, class_names = load_data('corpus.csv')
     print(
         f"Loaded {len(df)} samples with {len(class_names)} classes: {class_names}")
 
@@ -315,6 +315,29 @@ def train_model_with_cv():
             best_model = model
             best_tokenizer = tokenizer
             print(f"New best model found with F1: {best_f1:.4f}")
+
+            # Extract and plot training history for the best model
+            history = {
+                'train_loss': [],
+                'eval_loss': [],
+                'eval_accuracy': [],
+                'eval_f1': [],
+                'eval_precision': [],
+                'eval_recall': []
+            }
+
+            for log in trainer.state.log_history:
+                if 'loss' in log and 'epoch' in log and 'eval_loss' not in log:
+                    history['train_loss'].append(log['loss'])
+                elif 'eval_loss' in log:
+                    history['eval_loss'].append(log['eval_loss'])
+                    history['eval_accuracy'].append(log['eval_accuracy'])
+                    history['eval_f1'].append(log['eval_f1'])
+                    history['eval_precision'].append(log['eval_precision'])
+                    history['eval_recall'].append(log['eval_recall'])
+
+            # Plot training history for the best model
+            plot_training_history(history)
 
     avg_results = {}
     for metric in fold_results[0].keys():
