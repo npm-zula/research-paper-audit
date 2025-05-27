@@ -1,6 +1,10 @@
 # ignore the corpus
 corpus/*
 
+./venv/*
+/venv/*
+/.venv/
+
 corpus.csv
 
 /review_classifier
