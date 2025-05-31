@@ -38,13 +38,13 @@ if torch.cuda.is_available():
 
 # Configuration
 MODEL_NAME = "roberta-base"
-MAX_LENGTH = 512
+MAX_LENGTH = 384
 BATCH_SIZE = 8  # Per device train batch size for Trainer
 EVAL_BATCH_SIZE = BATCH_SIZE * 2  # Per device eval batch size
-GRADIENT_ACCUMULATION_STEPS = 4
-LEARNING_RATE = 3e-5
-NUM_EPOCHS_PER_FOLD = 15  # Renamed for clarity
-WEIGHT_DECAY = 0.01
+GRADIENT_ACCUMULATION_STEPS = 2
+LEARNING_RATE = 5e-5
+NUM_EPOCHS_PER_FOLD = 8  # Renamed for clarity
+WEIGHT_DECAY = 0.02
 WARMUP_RATIO = 0.1
 CROSS_VAL_FOLDS = 5
 
@@ -243,7 +243,8 @@ def explain_prediction(text, model, tokenizer, class_names, device):
 
 def train_model_with_cv():
     print("Loading data...")
-    df_full, class_names, label_encoder = load_data('corpus.csv')
+    df_full, class_names, label_encoder = load_data(
+        '/content/corpus-final.csv')
     print(
         f"Loaded {len(df_full)} samples with {len(class_names)} classes: {class_names}")
 
@@ -298,7 +299,7 @@ def train_model_with_cv():
 
         training_args_fold = TrainingArguments(
             output_dir=f"./roberta_results/fold_{fold+1}",
-            evaluation_strategy="epoch",
+            eval_strategy="epoch",
             save_strategy="epoch",
             learning_rate=LEARNING_RATE,
             per_device_train_batch_size=BATCH_SIZE,
@@ -560,18 +561,57 @@ if __name__ == "__main__":
         print(
             "\\nTraining process did not complete successfully or no best model was found.")
 
-    # The old evaluate_model and predict functions are now either integrated or can be called separately
-    # with the saved model. The main evaluation is part of train_model_with_cv.
-    # The old main block's test set evaluation is now handled within train_model_with_cv.
-
 
 """
+Starting RoBERTa model training with 5-fold cross-validation
+Model: roberta-base, Max Length: 384, Batch Size: 8 (Train), 16 (Eval)
+Gradient Accumulation Steps: 2
+Learning Rate: 5e-05, Epochs per fold: 8
+Loading data...
+Failed to decode with cp1252.
+Successfully loaded data with latin-1 encoding.
+Loaded 248 samples with 3 classes: ['AI-Generated' 'Authentic' 'Generic']
+Train/CV set size: 198, Test set size: 50
+loading file vocab.json from cache at /root/.cache/huggingface/hub/models--roberta-base/snapshots/e2da8e2f811d1448a5b465c236feacd80ffbac7b/vocab.json
+loading file merges.txt from cache at /root/.cache/huggingface/hub/models--roberta-base/snapshots/e2da8e2f811d1448a5b465c236feacd80ffbac7b/merges.txt
+loading file added_tokens.json from cache at None
+loading file special_tokens_map.json from cache at None
+loading file tokenizer_config.json from cache at /root/.cache/huggingface/hub/models--roberta-base/snapshots/e2da8e2f811d1448a5b465c236feacd80ffbac7b/tokenizer_config.json
+loading file tokenizer.json from cache at /root/.cache/huggingface/hub/models--roberta-base/snapshots/e2da8e2f811d1448a5b465c236feacd80ffbac7b/tokenizer.json
+loading file chat_template.jinja from cache at None
+loading configuration file config.json from cache at /root/.cache/huggingface/hub/models--roberta-base/snapshots/e2da8e2f811d1448a5b465c236feacd80ffbac7b/config.json
+Model config RobertaConfig {
+  "architectures": [
+    "RobertaForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "bos_token_id": 0,
+  "classifier_dropout": null,
+  "eos_token_id": 2,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "layer_norm_eps": 1e-05,
+  "max_position_embeddings": 514,
+  "model_type": "roberta",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 1,
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.52.3",
+  "type_vocab_size": 1,
+  "use_cache": true,
+  "vocab_size": 50265
+}
+
 Using device: cuda
 \n==================================================\nTraining Fold 1/5\n==================================================
 Map: 100%
- 220/220 [00:02<00:00, 81.67 examples/s]
+ 158/158 [00:02<00:00, 62.38 examples/s]
 Map: 100%
- 56/56 [00:00<00:00, 140.96 examples/s]
+ 40/40 [00:00<00:00, 40.48 examples/s]
 loading configuration file config.json from cache at /root/.cache/huggingface/hub/models--roberta-base/snapshots/e2da8e2f811d1448a5b465c236feacd80ffbac7b/config.json
 Model config RobertaConfig {
   "architectures": [
@@ -609,10 +649,6 @@ Model config RobertaConfig {
   "vocab_size": 50265
 }
 
-Xet Storage is enabled for this repo, but the 'hf_xet' package is not installed. Falling back to regular HTTP download. For better performance, install the package with: `pip install huggingface_hub[hf_xet]` or `pip install hf_xet`
-WARNING:huggingface_hub.file_download:Xet Storage is enabled for this repo, but the 'hf_xet' package is not installed. Falling back to regular HTTP download. For better performance, install the package with: `pip install huggingface_hub[hf_xet]` or `pip install hf_xet`
-model.safetensors: 100%
- 499M/499M [00:02<00:00, 269MB/s]
 loading weights file model.safetensors from cache at /root/.cache/huggingface/hub/models--roberta-base/snapshots/e2da8e2f811d1448a5b465c236feacd80ffbac7b/model.safetensors
 Some weights of the model checkpoint at roberta-base were not used when initializing RobertaForSequenceClassification: ['lm_head.bias', 'lm_head.dense.bias', 'lm_head.dense.weight', 'lm_head.layer_norm.bias', 'lm_head.layer_norm.weight']
 - This IS expected if you are initializing RobertaForSequenceClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
@@ -621,135 +657,123 @@ Some weights of RobertaForSequenceClassification were not initialized from the m
 You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
 PyTorch: setting up devices
 Using auto half precision backend
-The following columns in the Training set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+The following columns in the Training set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
 ***** Running training *****
-  Num examples = 220
-  Num Epochs = 15
+  Num examples = 158
+  Num Epochs = 8
   Instantaneous batch size per device = 8
-  Total train batch size (w. parallel, distributed & accumulation) = 32
-  Gradient Accumulation steps = 4
-  Total optimization steps = 105
+  Total train batch size (w. parallel, distributed & accumulation) = 16
+  Gradient Accumulation steps = 2
+  Total optimization steps = 80
   Number of trainable parameters = 124,647,939
 Starting training for Fold 1...
- [ 63/105 04:36 < 03:10, 0.22 it/s, Epoch 9/15]
+ [80/80 03:57, Epoch 8/8]
 Epoch	Training Loss	Validation Loss	Accuracy	F1	Precision	Recall
-1	1.120400	1.096191	0.303571	0.141389	0.092156	0.303571
-2	1.032900	1.015621	0.517857	0.353361	0.268176	0.517857
-3	0.968600	0.935922	0.517857	0.353361	0.268176	0.517857
-4	0.889800	0.888541	0.517857	0.353361	0.268176	0.517857
-5	0.816400	0.839994	0.553571	0.561238	0.573214	0.553571
-6	0.716300	0.845827	0.642857	0.637511	0.634037	0.642857
-7	0.621900	0.816930	0.571429	0.577555	0.589932	0.571429
-8	0.530400	0.837613	0.571429	0.579972	0.622115	0.571429
-9	0.423900	0.950415	0.553571	0.562075	0.601656	0.553571
-The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+1	1.099200	1.025159	0.450000	0.279310	0.202500	0.450000
+2	0.998900	0.916949	0.450000	0.279310	0.202500	0.450000
+3	0.859500	0.772675	0.650000	0.518848	0.439068	0.650000
+4	0.659600	0.568665	0.650000	0.638333	0.640909	0.650000
+5	0.474700	0.651655	0.625000	0.618791	0.614316	0.625000
+6	0.309000	0.698972	0.725000	0.725806	0.735882	0.725000
+7	0.218600	0.807765	0.700000	0.701176	0.706250	0.700000
+8	0.217600	0.750636	0.750000	0.750000	0.767460	0.750000
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 56
+  Num examples = 40
   Batch size = 16
 /usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
   _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
-Saving model checkpoint to ./roberta_results/fold_1/checkpoint-7
-Configuration saved in ./roberta_results/fold_1/checkpoint-7/config.json
-Model weights saved in ./roberta_results/fold_1/checkpoint-7/model.safetensors
-The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+Saving model checkpoint to ./roberta_results/fold_1/checkpoint-10
+Configuration saved in ./roberta_results/fold_1/checkpoint-10/config.json
+Model weights saved in ./roberta_results/fold_1/checkpoint-10/model.safetensors
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 56
+  Num examples = 40
   Batch size = 16
 /usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
   _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
-Saving model checkpoint to ./roberta_results/fold_1/checkpoint-14
-Configuration saved in ./roberta_results/fold_1/checkpoint-14/config.json
-Model weights saved in ./roberta_results/fold_1/checkpoint-14/model.safetensors
-The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+Saving model checkpoint to ./roberta_results/fold_1/checkpoint-20
+Configuration saved in ./roberta_results/fold_1/checkpoint-20/config.json
+Model weights saved in ./roberta_results/fold_1/checkpoint-20/model.safetensors
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 56
+  Num examples = 40
   Batch size = 16
 /usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
   _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
-Saving model checkpoint to ./roberta_results/fold_1/checkpoint-21
-Configuration saved in ./roberta_results/fold_1/checkpoint-21/config.json
-Model weights saved in ./roberta_results/fold_1/checkpoint-21/model.safetensors
-Deleting older checkpoint [roberta_results/fold_1/checkpoint-7] due to args.save_total_limit
-The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+Saving model checkpoint to ./roberta_results/fold_1/checkpoint-30
+Configuration saved in ./roberta_results/fold_1/checkpoint-30/config.json
+Model weights saved in ./roberta_results/fold_1/checkpoint-30/model.safetensors
+Deleting older checkpoint [roberta_results/fold_1/checkpoint-10] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 56
+  Num examples = 40
   Batch size = 16
-/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
-  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
-Saving model checkpoint to ./roberta_results/fold_1/checkpoint-28
-Configuration saved in ./roberta_results/fold_1/checkpoint-28/config.json
-Model weights saved in ./roberta_results/fold_1/checkpoint-28/model.safetensors
-Deleting older checkpoint [roberta_results/fold_1/checkpoint-21] due to args.save_total_limit
-The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+Saving model checkpoint to ./roberta_results/fold_1/checkpoint-40
+Configuration saved in ./roberta_results/fold_1/checkpoint-40/config.json
+Model weights saved in ./roberta_results/fold_1/checkpoint-40/model.safetensors
+Deleting older checkpoint [roberta_results/fold_1/checkpoint-20] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 56
+  Num examples = 40
   Batch size = 16
-Saving model checkpoint to ./roberta_results/fold_1/checkpoint-35
-Configuration saved in ./roberta_results/fold_1/checkpoint-35/config.json
-Model weights saved in ./roberta_results/fold_1/checkpoint-35/model.safetensors
-Deleting older checkpoint [roberta_results/fold_1/checkpoint-14] due to args.save_total_limit
-The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+Saving model checkpoint to ./roberta_results/fold_1/checkpoint-50
+Configuration saved in ./roberta_results/fold_1/checkpoint-50/config.json
+Model weights saved in ./roberta_results/fold_1/checkpoint-50/model.safetensors
+Deleting older checkpoint [roberta_results/fold_1/checkpoint-30] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 56
+  Num examples = 40
   Batch size = 16
-Saving model checkpoint to ./roberta_results/fold_1/checkpoint-42
-Configuration saved in ./roberta_results/fold_1/checkpoint-42/config.json
-Model weights saved in ./roberta_results/fold_1/checkpoint-42/model.safetensors
-Deleting older checkpoint [roberta_results/fold_1/checkpoint-28] due to args.save_total_limit
-The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+Saving model checkpoint to ./roberta_results/fold_1/checkpoint-60
+Configuration saved in ./roberta_results/fold_1/checkpoint-60/config.json
+Model weights saved in ./roberta_results/fold_1/checkpoint-60/model.safetensors
+Deleting older checkpoint [roberta_results/fold_1/checkpoint-40] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 56
+  Num examples = 40
   Batch size = 16
-Saving model checkpoint to ./roberta_results/fold_1/checkpoint-49
-Configuration saved in ./roberta_results/fold_1/checkpoint-49/config.json
-Model weights saved in ./roberta_results/fold_1/checkpoint-49/model.safetensors
-Deleting older checkpoint [roberta_results/fold_1/checkpoint-35] due to args.save_total_limit
-The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+Saving model checkpoint to ./roberta_results/fold_1/checkpoint-70
+Configuration saved in ./roberta_results/fold_1/checkpoint-70/config.json
+Model weights saved in ./roberta_results/fold_1/checkpoint-70/model.safetensors
+Deleting older checkpoint [roberta_results/fold_1/checkpoint-50] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 56
+  Num examples = 40
   Batch size = 16
-Saving model checkpoint to ./roberta_results/fold_1/checkpoint-56
-Configuration saved in ./roberta_results/fold_1/checkpoint-56/config.json
-Model weights saved in ./roberta_results/fold_1/checkpoint-56/model.safetensors
-Deleting older checkpoint [roberta_results/fold_1/checkpoint-49] due to args.save_total_limit
-The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
-
-***** Running Evaluation *****
-  Num examples = 56
-  Batch size = 16
-Saving model checkpoint to ./roberta_results/fold_1/checkpoint-63
-Configuration saved in ./roberta_results/fold_1/checkpoint-63/config.json
-Model weights saved in ./roberta_results/fold_1/checkpoint-63/model.safetensors
-Deleting older checkpoint [roberta_results/fold_1/checkpoint-56] due to args.save_total_limit
+Saving model checkpoint to ./roberta_results/fold_1/checkpoint-80
+Configuration saved in ./roberta_results/fold_1/checkpoint-80/config.json
+Model weights saved in ./roberta_results/fold_1/checkpoint-80/model.safetensors
+Deleting older checkpoint [roberta_results/fold_1/checkpoint-60] due to args.save_total_limit
 
 
 Training completed. Do not forget to share your model on huggingface.co/models =)
 
 
-Loading best model from ./roberta_results/fold_1/checkpoint-42 (score: 0.6375109895653176).
-Deleting older checkpoint [roberta_results/fold_1/checkpoint-63] due to args.save_total_limit
-The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+Loading best model from ./roberta_results/fold_1/checkpoint-80 (score: 0.75).
+Deleting older checkpoint [roberta_results/fold_1/checkpoint-70] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 56
+  Num examples = 40
   Batch size = 16
 Evaluating best model of Fold 1 on its validation set...
- [4/4 00:00]
-Fold 1 Validation: F1=0.6375, Accuracy=0.6429
-New best model found in Fold 1 with Val F1: 0.6375
+ [3/3 00:00]
+Fold 1 Validation: F1=0.7500, Accuracy=0.7500
+New best model found in Fold 1 with Val F1: 0.7500
 \n==================================================\nTraining Fold 2/5\n==================================================
 Map: 100%
- 221/221 [00:01<00:00, 161.10 examples/s]
+ 158/158 [00:00<00:00, 184.37 examples/s]
 Map: 100%
- 55/55 [00:00<00:00, 123.35 examples/s]
+ 40/40 [00:00<00:00, 131.40 examples/s]
 loading configuration file config.json from cache at /root/.cache/huggingface/hub/models--roberta-base/snapshots/e2da8e2f811d1448a5b465c236feacd80ffbac7b/config.json
 Model config RobertaConfig {
   "architectures": [
@@ -795,86 +819,121 @@ Some weights of RobertaForSequenceClassification were not initialized from the m
 You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
 PyTorch: setting up devices
 Using auto half precision backend
-The following columns in the Training set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
-***** Running training *****
-  Num examples = 221
-  Num Epochs = 15
-  Instantaneous batch size per device = 8
-  Total train batch size (w. parallel, distributed & accumulation) = 32
-  Gradient Accumulation steps = 4
-  Total optimization steps = 105
-  Number of trainable parameters = 124,647,939
 Starting training for Fold 2...
- [ 28/105 02:03 < 06:06, 0.21 it/s, Epoch 4/15]
+The following columns in the Training set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+***** Running training *****
+  Num examples = 158
+  Num Epochs = 8
+  Instantaneous batch size per device = 8
+  Total train batch size (w. parallel, distributed & accumulation) = 16
+  Gradient Accumulation steps = 2
+  Total optimization steps = 80
+  Number of trainable parameters = 124,647,939
+ [80/80 03:27, Epoch 8/8]
 Epoch	Training Loss	Validation Loss	Accuracy	F1	Precision	Recall
-1	1.113800	1.073224	0.418182	0.398658	0.431039	0.418182
-2	1.041500	0.977526	0.527273	0.364069	0.278017	0.527273
-3	0.959700	0.873366	0.527273	0.364069	0.278017	0.527273
-4	0.861600	0.823561	0.527273	0.364069	0.278017	0.527273
-The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+1	1.082600	1.044531	0.450000	0.279310	0.202500	0.450000
+2	1.051400	0.993372	0.450000	0.329231	0.283333	0.450000
+3	0.875700	0.778552	0.700000	0.690040	0.739755	0.700000
+4	0.674600	0.579173	0.725000	0.725653	0.730385	0.725000
+5	0.439200	0.557792	0.725000	0.719836	0.719006	0.725000
+6	0.296400	0.614709	0.775000	0.778046	0.783333	0.775000
+7	0.195000	0.762640	0.750000	0.752207	0.756579	0.750000
+8	0.104200	0.766261	0.750000	0.748874	0.748887	0.750000
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 55
+  Num examples = 40
   Batch size = 16
 /usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
   _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
-Saving model checkpoint to ./roberta_results/fold_2/checkpoint-7
-Configuration saved in ./roberta_results/fold_2/checkpoint-7/config.json
-Model weights saved in ./roberta_results/fold_2/checkpoint-7/model.safetensors
-The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+Saving model checkpoint to ./roberta_results/fold_2/checkpoint-10
+Configuration saved in ./roberta_results/fold_2/checkpoint-10/config.json
+Model weights saved in ./roberta_results/fold_2/checkpoint-10/model.safetensors
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 55
+  Num examples = 40
   Batch size = 16
 /usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
   _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
-Saving model checkpoint to ./roberta_results/fold_2/checkpoint-14
-Configuration saved in ./roberta_results/fold_2/checkpoint-14/config.json
-Model weights saved in ./roberta_results/fold_2/checkpoint-14/model.safetensors
-The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+Saving model checkpoint to ./roberta_results/fold_2/checkpoint-20
+Configuration saved in ./roberta_results/fold_2/checkpoint-20/config.json
+Model weights saved in ./roberta_results/fold_2/checkpoint-20/model.safetensors
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 55
+  Num examples = 40
   Batch size = 16
-/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
-  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
-Saving model checkpoint to ./roberta_results/fold_2/checkpoint-21
-Configuration saved in ./roberta_results/fold_2/checkpoint-21/config.json
-Model weights saved in ./roberta_results/fold_2/checkpoint-21/model.safetensors
-Deleting older checkpoint [roberta_results/fold_2/checkpoint-14] due to args.save_total_limit
-The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+Saving model checkpoint to ./roberta_results/fold_2/checkpoint-30
+Configuration saved in ./roberta_results/fold_2/checkpoint-30/config.json
+Model weights saved in ./roberta_results/fold_2/checkpoint-30/model.safetensors
+Deleting older checkpoint [roberta_results/fold_2/checkpoint-10] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 55
+  Num examples = 40
   Batch size = 16
-/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
-  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
-Saving model checkpoint to ./roberta_results/fold_2/checkpoint-28
-Configuration saved in ./roberta_results/fold_2/checkpoint-28/config.json
-Model weights saved in ./roberta_results/fold_2/checkpoint-28/model.safetensors
-Deleting older checkpoint [roberta_results/fold_2/checkpoint-21] due to args.save_total_limit
+Saving model checkpoint to ./roberta_results/fold_2/checkpoint-40
+Configuration saved in ./roberta_results/fold_2/checkpoint-40/config.json
+Model weights saved in ./roberta_results/fold_2/checkpoint-40/model.safetensors
+Deleting older checkpoint [roberta_results/fold_2/checkpoint-20] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 40
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_2/checkpoint-50
+Configuration saved in ./roberta_results/fold_2/checkpoint-50/config.json
+Model weights saved in ./roberta_results/fold_2/checkpoint-50/model.safetensors
+Deleting older checkpoint [roberta_results/fold_2/checkpoint-30] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 40
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_2/checkpoint-60
+Configuration saved in ./roberta_results/fold_2/checkpoint-60/config.json
+Model weights saved in ./roberta_results/fold_2/checkpoint-60/model.safetensors
+Deleting older checkpoint [roberta_results/fold_2/checkpoint-40] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 40
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_2/checkpoint-70
+Configuration saved in ./roberta_results/fold_2/checkpoint-70/config.json
+Model weights saved in ./roberta_results/fold_2/checkpoint-70/model.safetensors
+Deleting older checkpoint [roberta_results/fold_2/checkpoint-50] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 40
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_2/checkpoint-80
+Configuration saved in ./roberta_results/fold_2/checkpoint-80/config.json
+Model weights saved in ./roberta_results/fold_2/checkpoint-80/model.safetensors
+Deleting older checkpoint [roberta_results/fold_2/checkpoint-70] due to args.save_total_limit
 
 
 Training completed. Do not forget to share your model on huggingface.co/models =)
 
 
-Loading best model from ./roberta_results/fold_2/checkpoint-7 (score: 0.3986584843727701).
-Deleting older checkpoint [roberta_results/fold_2/checkpoint-28] due to args.save_total_limit
-The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+Loading best model from ./roberta_results/fold_2/checkpoint-60 (score: 0.7780459770114942).
+Deleting older checkpoint [roberta_results/fold_2/checkpoint-80] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 55
+  Num examples = 40
   Batch size = 16
 Evaluating best model of Fold 2 on its validation set...
- [4/4 00:00]
-/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
-  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
-Fold 2 Validation: F1=0.3987, Accuracy=0.4182
+ [3/3 00:00]
+Fold 2 Validation: F1=0.7780, Accuracy=0.7750
+New best model found in Fold 2 with Val F1: 0.7780
 \n==================================================\nTraining Fold 3/5\n==================================================
 Map: 100%
- 221/221 [00:01<00:00, 164.29 examples/s]
+ 158/158 [00:00<00:00, 188.93 examples/s]
 Map: 100%
- 55/55 [00:00<00:00, 129.96 examples/s]
+ 40/40 [00:00<00:00, 90.04 examples/s]
 loading configuration file config.json from cache at /root/.cache/huggingface/hub/models--roberta-base/snapshots/e2da8e2f811d1448a5b465c236feacd80ffbac7b/config.json
 Model config RobertaConfig {
   "architectures": [
@@ -920,86 +979,120 @@ Some weights of RobertaForSequenceClassification were not initialized from the m
 You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
 PyTorch: setting up devices
 Using auto half precision backend
-Starting training for Fold 3...
-The following columns in the Training set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+The following columns in the Training set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
 ***** Running training *****
-  Num examples = 221
-  Num Epochs = 15
+  Num examples = 158
+  Num Epochs = 8
   Instantaneous batch size per device = 8
-  Total train batch size (w. parallel, distributed & accumulation) = 32
-  Gradient Accumulation steps = 4
-  Total optimization steps = 105
+  Total train batch size (w. parallel, distributed & accumulation) = 16
+  Gradient Accumulation steps = 2
+  Total optimization steps = 80
   Number of trainable parameters = 124,647,939
- [ 28/105 02:23 < 07:06, 0.18 it/s, Epoch 4/15]
+Starting training for Fold 3...
+ [80/80 03:58, Epoch 8/8]
 Epoch	Training Loss	Validation Loss	Accuracy	F1	Precision	Recall
-1	1.098600	1.052441	0.527273	0.364069	0.278017	0.527273
-2	1.030400	0.961958	0.527273	0.364069	0.278017	0.527273
-3	0.965800	0.938730	0.527273	0.364069	0.278017	0.527273
-4	0.912800	0.871032	0.527273	0.364069	0.278017	0.527273
-The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+1	1.080800	1.046082	0.450000	0.279310	0.202500	0.450000
+2	1.026800	0.914520	0.375000	0.288820	0.390000	0.375000
+3	0.634100	0.656210	0.625000	0.632719	0.678205	0.625000
+4	0.467200	0.674491	0.675000	0.660360	0.732609	0.675000
+5	0.365100	0.729646	0.675000	0.680748	0.694561	0.675000
+6	0.252500	0.814563	0.650000	0.648831	0.702273	0.650000
+7	0.126700	1.047662	0.625000	0.619775	0.682391	0.625000
+8	0.076600	1.122068	0.625000	0.627813	0.694664	0.625000
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 55
+  Num examples = 40
   Batch size = 16
 /usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
   _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
-Saving model checkpoint to ./roberta_results/fold_3/checkpoint-7
-Configuration saved in ./roberta_results/fold_3/checkpoint-7/config.json
-Model weights saved in ./roberta_results/fold_3/checkpoint-7/model.safetensors
-The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+Saving model checkpoint to ./roberta_results/fold_3/checkpoint-10
+Configuration saved in ./roberta_results/fold_3/checkpoint-10/config.json
+Model weights saved in ./roberta_results/fold_3/checkpoint-10/model.safetensors
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 55
+  Num examples = 40
   Batch size = 16
 /usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
   _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
-Saving model checkpoint to ./roberta_results/fold_3/checkpoint-14
-Configuration saved in ./roberta_results/fold_3/checkpoint-14/config.json
-Model weights saved in ./roberta_results/fold_3/checkpoint-14/model.safetensors
-The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+Saving model checkpoint to ./roberta_results/fold_3/checkpoint-20
+Configuration saved in ./roberta_results/fold_3/checkpoint-20/config.json
+Model weights saved in ./roberta_results/fold_3/checkpoint-20/model.safetensors
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 55
+  Num examples = 40
   Batch size = 16
-/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
-  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
-Saving model checkpoint to ./roberta_results/fold_3/checkpoint-21
-Configuration saved in ./roberta_results/fold_3/checkpoint-21/config.json
-Model weights saved in ./roberta_results/fold_3/checkpoint-21/model.safetensors
-Deleting older checkpoint [roberta_results/fold_3/checkpoint-14] due to args.save_total_limit
-The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+Saving model checkpoint to ./roberta_results/fold_3/checkpoint-30
+Configuration saved in ./roberta_results/fold_3/checkpoint-30/config.json
+Model weights saved in ./roberta_results/fold_3/checkpoint-30/model.safetensors
+Deleting older checkpoint [roberta_results/fold_3/checkpoint-10] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 55
+  Num examples = 40
   Batch size = 16
-/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
-  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
-Saving model checkpoint to ./roberta_results/fold_3/checkpoint-28
-Configuration saved in ./roberta_results/fold_3/checkpoint-28/config.json
-Model weights saved in ./roberta_results/fold_3/checkpoint-28/model.safetensors
-Deleting older checkpoint [roberta_results/fold_3/checkpoint-21] due to args.save_total_limit
+Saving model checkpoint to ./roberta_results/fold_3/checkpoint-40
+Configuration saved in ./roberta_results/fold_3/checkpoint-40/config.json
+Model weights saved in ./roberta_results/fold_3/checkpoint-40/model.safetensors
+Deleting older checkpoint [roberta_results/fold_3/checkpoint-20] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 40
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_3/checkpoint-50
+Configuration saved in ./roberta_results/fold_3/checkpoint-50/config.json
+Model weights saved in ./roberta_results/fold_3/checkpoint-50/model.safetensors
+Deleting older checkpoint [roberta_results/fold_3/checkpoint-30] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 40
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_3/checkpoint-60
+Configuration saved in ./roberta_results/fold_3/checkpoint-60/config.json
+Model weights saved in ./roberta_results/fold_3/checkpoint-60/model.safetensors
+Deleting older checkpoint [roberta_results/fold_3/checkpoint-40] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 40
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_3/checkpoint-70
+Configuration saved in ./roberta_results/fold_3/checkpoint-70/config.json
+Model weights saved in ./roberta_results/fold_3/checkpoint-70/model.safetensors
+Deleting older checkpoint [roberta_results/fold_3/checkpoint-60] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 40
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_3/checkpoint-80
+Configuration saved in ./roberta_results/fold_3/checkpoint-80/config.json
+Model weights saved in ./roberta_results/fold_3/checkpoint-80/model.safetensors
+Deleting older checkpoint [roberta_results/fold_3/checkpoint-70] due to args.save_total_limit
 
 
 Training completed. Do not forget to share your model on huggingface.co/models =)
 
 
-Loading best model from ./roberta_results/fold_3/checkpoint-7 (score: 0.36406926406926404).
-Deleting older checkpoint [roberta_results/fold_3/checkpoint-28] due to args.save_total_limit
-The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+Loading best model from ./roberta_results/fold_3/checkpoint-50 (score: 0.6807482359206498).
+Deleting older checkpoint [roberta_results/fold_3/checkpoint-80] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 55
+  Num examples = 40
   Batch size = 16
 Evaluating best model of Fold 3 on its validation set...
- [4/4 00:00]
-/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
-  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
-Fold 3 Validation: F1=0.3641, Accuracy=0.5273
+ [3/3 00:00]
+Fold 3 Validation: F1=0.6807, Accuracy=0.6750
 \n==================================================\nTraining Fold 4/5\n==================================================
 Map: 100%
- 221/221 [00:01<00:00, 165.38 examples/s]
+ 159/159 [00:00<00:00, 184.44 examples/s]
 Map: 100%
- 55/55 [00:00<00:00, 123.57 examples/s]
+ 39/39 [00:00<00:00, 90.56 examples/s]
 loading configuration file config.json from cache at /root/.cache/huggingface/hub/models--roberta-base/snapshots/e2da8e2f811d1448a5b465c236feacd80ffbac7b/config.json
 Model config RobertaConfig {
   "architectures": [
@@ -1045,86 +1138,121 @@ Some weights of RobertaForSequenceClassification were not initialized from the m
 You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
 PyTorch: setting up devices
 Using auto half precision backend
-The following columns in the Training set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+The following columns in the Training set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
 ***** Running training *****
-  Num examples = 221
-  Num Epochs = 15
+  Num examples = 159
+  Num Epochs = 8
   Instantaneous batch size per device = 8
-  Total train batch size (w. parallel, distributed & accumulation) = 32
-  Gradient Accumulation steps = 4
-  Total optimization steps = 105
+  Total train batch size (w. parallel, distributed & accumulation) = 16
+  Gradient Accumulation steps = 2
+  Total optimization steps = 80
   Number of trainable parameters = 124,647,939
 Starting training for Fold 4...
- [ 28/105 02:10 < 06:25, 0.20 it/s, Epoch 4/15]
+ [80/80 03:37, Epoch 8/8]
 Epoch	Training Loss	Validation Loss	Accuracy	F1	Precision	Recall
-1	1.084800	1.053711	0.509091	0.343483	0.259174	0.509091
-2	1.009700	0.983350	0.509091	0.343483	0.259174	0.509091
-3	0.968200	0.924796	0.509091	0.343483	0.259174	0.509091
-4	0.905100	0.889329	0.509091	0.343483	0.259174	0.509091
-The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+1	1.095400	1.042356	0.461538	0.291498	0.213018	0.461538
+2	1.041000	0.965845	0.461538	0.291498	0.213018	0.461538
+3	0.854800	0.880440	0.538462	0.504903	0.662108	0.538462
+4	0.556500	0.745034	0.564103	0.563370	0.599145	0.564103
+5	0.389300	0.707433	0.615385	0.612698	0.679720	0.615385
+6	0.324300	0.718010	0.743590	0.741237	0.740741	0.743590
+7	0.132700	0.690520	0.769231	0.772650	0.778388	0.769231
+8	0.064500	0.797814	0.794872	0.798779	0.807441	0.794872
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 55
+  Num examples = 39
   Batch size = 16
 /usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
   _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
-Saving model checkpoint to ./roberta_results/fold_4/checkpoint-7
-Configuration saved in ./roberta_results/fold_4/checkpoint-7/config.json
-Model weights saved in ./roberta_results/fold_4/checkpoint-7/model.safetensors
-The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+Saving model checkpoint to ./roberta_results/fold_4/checkpoint-10
+Configuration saved in ./roberta_results/fold_4/checkpoint-10/config.json
+Model weights saved in ./roberta_results/fold_4/checkpoint-10/model.safetensors
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 55
+  Num examples = 39
   Batch size = 16
 /usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
   _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
-Saving model checkpoint to ./roberta_results/fold_4/checkpoint-14
-Configuration saved in ./roberta_results/fold_4/checkpoint-14/config.json
-Model weights saved in ./roberta_results/fold_4/checkpoint-14/model.safetensors
-The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+Saving model checkpoint to ./roberta_results/fold_4/checkpoint-20
+Configuration saved in ./roberta_results/fold_4/checkpoint-20/config.json
+Model weights saved in ./roberta_results/fold_4/checkpoint-20/model.safetensors
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 55
+  Num examples = 39
   Batch size = 16
-/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
-  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
-Saving model checkpoint to ./roberta_results/fold_4/checkpoint-21
-Configuration saved in ./roberta_results/fold_4/checkpoint-21/config.json
-Model weights saved in ./roberta_results/fold_4/checkpoint-21/model.safetensors
-Deleting older checkpoint [roberta_results/fold_4/checkpoint-14] due to args.save_total_limit
-The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+Saving model checkpoint to ./roberta_results/fold_4/checkpoint-30
+Configuration saved in ./roberta_results/fold_4/checkpoint-30/config.json
+Model weights saved in ./roberta_results/fold_4/checkpoint-30/model.safetensors
+Deleting older checkpoint [roberta_results/fold_4/checkpoint-10] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 55
+  Num examples = 39
   Batch size = 16
-/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
-  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
-Saving model checkpoint to ./roberta_results/fold_4/checkpoint-28
-Configuration saved in ./roberta_results/fold_4/checkpoint-28/config.json
-Model weights saved in ./roberta_results/fold_4/checkpoint-28/model.safetensors
-Deleting older checkpoint [roberta_results/fold_4/checkpoint-21] due to args.save_total_limit
+Saving model checkpoint to ./roberta_results/fold_4/checkpoint-40
+Configuration saved in ./roberta_results/fold_4/checkpoint-40/config.json
+Model weights saved in ./roberta_results/fold_4/checkpoint-40/model.safetensors
+Deleting older checkpoint [roberta_results/fold_4/checkpoint-20] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 39
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_4/checkpoint-50
+Configuration saved in ./roberta_results/fold_4/checkpoint-50/config.json
+Model weights saved in ./roberta_results/fold_4/checkpoint-50/model.safetensors
+Deleting older checkpoint [roberta_results/fold_4/checkpoint-30] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 39
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_4/checkpoint-60
+Configuration saved in ./roberta_results/fold_4/checkpoint-60/config.json
+Model weights saved in ./roberta_results/fold_4/checkpoint-60/model.safetensors
+Deleting older checkpoint [roberta_results/fold_4/checkpoint-40] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 39
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_4/checkpoint-70
+Configuration saved in ./roberta_results/fold_4/checkpoint-70/config.json
+Model weights saved in ./roberta_results/fold_4/checkpoint-70/model.safetensors
+Deleting older checkpoint [roberta_results/fold_4/checkpoint-50] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 39
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_4/checkpoint-80
+Configuration saved in ./roberta_results/fold_4/checkpoint-80/config.json
+Model weights saved in ./roberta_results/fold_4/checkpoint-80/model.safetensors
+Deleting older checkpoint [roberta_results/fold_4/checkpoint-60] due to args.save_total_limit
 
 
 Training completed. Do not forget to share your model on huggingface.co/models =)
 
 
-Loading best model from ./roberta_results/fold_4/checkpoint-7 (score: 0.3434830230010953).
-Deleting older checkpoint [roberta_results/fold_4/checkpoint-28] due to args.save_total_limit
-The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+Loading best model from ./roberta_results/fold_4/checkpoint-80 (score: 0.7987789987789987).
+Deleting older checkpoint [roberta_results/fold_4/checkpoint-70] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 55
+  Num examples = 39
   Batch size = 16
 Evaluating best model of Fold 4 on its validation set...
- [4/4 00:00]
-/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
-  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
-Fold 4 Validation: F1=0.3435, Accuracy=0.5091
+ [3/3 00:00]
+Fold 4 Validation: F1=0.7988, Accuracy=0.7949
+New best model found in Fold 4 with Val F1: 0.7988
 \n==================================================\nTraining Fold 5/5\n==================================================
 Map: 100%
- 221/221 [00:01<00:00, 159.77 examples/s]
+ 159/159 [00:00<00:00, 184.08 examples/s]
 Map: 100%
- 55/55 [00:00<00:00, 127.69 examples/s]
+ 39/39 [00:00<00:00, 127.21 examples/s]
 loading configuration file config.json from cache at /root/.cache/huggingface/hub/models--roberta-base/snapshots/e2da8e2f811d1448a5b465c236feacd80ffbac7b/config.json
 Model config RobertaConfig {
   "architectures": [
@@ -1171,86 +1299,121 @@ You should probably TRAIN this model on a down-stream task to be able to use it 
 PyTorch: setting up devices
 Using auto half precision backend
 Starting training for Fold 5...
-The following columns in the Training set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+The following columns in the Training set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
 ***** Running training *****
-  Num examples = 221
-  Num Epochs = 15
+  Num examples = 159
+  Num Epochs = 8
   Instantaneous batch size per device = 8
-  Total train batch size (w. parallel, distributed & accumulation) = 32
-  Gradient Accumulation steps = 4
-  Total optimization steps = 105
+  Total train batch size (w. parallel, distributed & accumulation) = 16
+  Gradient Accumulation steps = 2
+  Total optimization steps = 80
   Number of trainable parameters = 124,647,939
- [ 28/105 01:43 < 05:05, 0.25 it/s, Epoch 4/15]
+ [80/80 03:31, Epoch 8/8]
 Epoch	Training Loss	Validation Loss	Accuracy	F1	Precision	Recall
-1	1.092000	1.051012	0.509091	0.343483	0.259174	0.509091
-2	1.005100	0.982590	0.509091	0.343483	0.259174	0.509091
-3	0.966800	0.954985	0.509091	0.343483	0.259174	0.509091
-4	0.914100	0.863259	0.509091	0.343483	0.259174	0.509091
-The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+1	1.098300	1.049692	0.435897	0.264652	0.190007	0.435897
+2	1.037900	0.896522	0.487179	0.356505	0.405405	0.487179
+3	0.721900	0.514764	0.794872	0.793404	0.801282	0.794872
+4	0.560300	0.388946	0.846154	0.844510	0.848403	0.846154
+5	0.336700	0.366144	0.820513	0.819753	0.820294	0.820513
+6	0.279600	0.339825	0.871795	0.871252	0.872124	0.871795
+7	0.166000	0.578535	0.794872	0.782284	0.822464	0.794872
+8	0.175500	0.417800	0.820513	0.819753	0.820294	0.820513
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 55
+  Num examples = 39
   Batch size = 16
 /usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
   _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
-Saving model checkpoint to ./roberta_results/fold_5/checkpoint-7
-Configuration saved in ./roberta_results/fold_5/checkpoint-7/config.json
-Model weights saved in ./roberta_results/fold_5/checkpoint-7/model.safetensors
-The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+Saving model checkpoint to ./roberta_results/fold_5/checkpoint-10
+Configuration saved in ./roberta_results/fold_5/checkpoint-10/config.json
+Model weights saved in ./roberta_results/fold_5/checkpoint-10/model.safetensors
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 55
+  Num examples = 39
   Batch size = 16
 /usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
   _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
-Saving model checkpoint to ./roberta_results/fold_5/checkpoint-14
-Configuration saved in ./roberta_results/fold_5/checkpoint-14/config.json
-Model weights saved in ./roberta_results/fold_5/checkpoint-14/model.safetensors
-The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+Saving model checkpoint to ./roberta_results/fold_5/checkpoint-20
+Configuration saved in ./roberta_results/fold_5/checkpoint-20/config.json
+Model weights saved in ./roberta_results/fold_5/checkpoint-20/model.safetensors
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 55
+  Num examples = 39
   Batch size = 16
-/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
-  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
-Saving model checkpoint to ./roberta_results/fold_5/checkpoint-21
-Configuration saved in ./roberta_results/fold_5/checkpoint-21/config.json
-Model weights saved in ./roberta_results/fold_5/checkpoint-21/model.safetensors
-Deleting older checkpoint [roberta_results/fold_5/checkpoint-14] due to args.save_total_limit
-The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+Saving model checkpoint to ./roberta_results/fold_5/checkpoint-30
+Configuration saved in ./roberta_results/fold_5/checkpoint-30/config.json
+Model weights saved in ./roberta_results/fold_5/checkpoint-30/model.safetensors
+Deleting older checkpoint [roberta_results/fold_5/checkpoint-10] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 55
+  Num examples = 39
   Batch size = 16
-/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
-  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
-Saving model checkpoint to ./roberta_results/fold_5/checkpoint-28
-Configuration saved in ./roberta_results/fold_5/checkpoint-28/config.json
-Model weights saved in ./roberta_results/fold_5/checkpoint-28/model.safetensors
-Deleting older checkpoint [roberta_results/fold_5/checkpoint-21] due to args.save_total_limit
+Saving model checkpoint to ./roberta_results/fold_5/checkpoint-40
+Configuration saved in ./roberta_results/fold_5/checkpoint-40/config.json
+Model weights saved in ./roberta_results/fold_5/checkpoint-40/model.safetensors
+Deleting older checkpoint [roberta_results/fold_5/checkpoint-20] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 39
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_5/checkpoint-50
+Configuration saved in ./roberta_results/fold_5/checkpoint-50/config.json
+Model weights saved in ./roberta_results/fold_5/checkpoint-50/model.safetensors
+Deleting older checkpoint [roberta_results/fold_5/checkpoint-30] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 39
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_5/checkpoint-60
+Configuration saved in ./roberta_results/fold_5/checkpoint-60/config.json
+Model weights saved in ./roberta_results/fold_5/checkpoint-60/model.safetensors
+Deleting older checkpoint [roberta_results/fold_5/checkpoint-40] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 39
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_5/checkpoint-70
+Configuration saved in ./roberta_results/fold_5/checkpoint-70/config.json
+Model weights saved in ./roberta_results/fold_5/checkpoint-70/model.safetensors
+Deleting older checkpoint [roberta_results/fold_5/checkpoint-50] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 39
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_5/checkpoint-80
+Configuration saved in ./roberta_results/fold_5/checkpoint-80/config.json
+Model weights saved in ./roberta_results/fold_5/checkpoint-80/model.safetensors
+Deleting older checkpoint [roberta_results/fold_5/checkpoint-70] due to args.save_total_limit
 
 
 Training completed. Do not forget to share your model on huggingface.co/models =)
 
 
-Loading best model from ./roberta_results/fold_5/checkpoint-7 (score: 0.3434830230010953).
-Deleting older checkpoint [roberta_results/fold_5/checkpoint-28] due to args.save_total_limit
-The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Abstract, Paper Title, Review Type, Review Text, text. If Abstract, Paper Title, Review Type, Review Text, text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+Loading best model from ./roberta_results/fold_5/checkpoint-60 (score: 0.8712522045855378).
+Deleting older checkpoint [roberta_results/fold_5/checkpoint-80] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: text, Review Type, Paper Title, Review Text, Abstract. If text, Review Type, Paper Title, Review Text, Abstract are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 55
+  Num examples = 39
   Batch size = 16
 Evaluating best model of Fold 5 on its validation set...
- [4/4 00:00]
-/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
-  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
-Fold 5 Validation: F1=0.3435, Accuracy=0.5091
+ [3/3 00:00]
+Fold 5 Validation: F1=0.8713, Accuracy=0.8718
+New best model found in Fold 5 with Val F1: 0.8713
 \nAverage Cross-Validation Results:
-  Average eval_loss: 1.0152
-  Average eval_accuracy: 0.5213
-  Average eval_f1: 0.4174
-  Average eval_precision: 0.3723
-  Average eval_recall: 0.5213
+  Average eval_loss: 0.6465
+  Average eval_accuracy: 0.7733
+  Average eval_f1: 0.7758
+  Average eval_precision: 0.7850
+  Average eval_recall: 0.7733
 \nLoading the overall best model for final evaluation...
 loading configuration file config.json from cache at /root/.cache/huggingface/hub/models--roberta-base/snapshots/e2da8e2f811d1448a5b465c236feacd80ffbac7b/config.json
 Model config RobertaConfig {
@@ -1298,26 +1461,957 @@ You should probably TRAIN this model on a down-stream task to be able to use it 
 Training history plot saved to roberta_training_history_cv_best_fold.png
 \nPreparing test set for final evaluation...
 Map: 100%
- 70/70 [00:00<00:00, 135.67 examples/s]
+ 50/50 [00:00<00:00, 144.37 examples/s]
 Final Test Set Evaluation: 100%
- 5/5 [00:02<00:00,  2.51it/s]
-  Test Set: Accuracy=0.6143, F1=0.5763, Precision=0.5682, Recall=0.6143
+ 4/4 [00:01<00:00,  2.88it/s]
+  Test Set: Accuracy=0.6800, F1=0.6830, Precision=0.7092, Recall=0.6800
 Configuration saved in ./roberta_classifier_cv/config.json
 Confusion matrix plot saved to roberta_confusion_matrix_cv_test.png
 \nTest Set Performance Report (Overall Best Model):
               precision    recall  f1-score   support
 
-AI-Generated       0.71      0.83      0.77        12
-   Authentic       0.64      0.81      0.72        36
-     Generic       0.36      0.18      0.24        22
+AI-Generated       0.90      0.90      0.90        10
+   Authentic       0.76      0.57      0.65        23
+     Generic       0.52      0.71      0.60        17
 
-    accuracy                           0.61        70
-   macro avg       0.57      0.61      0.58        70
-weighted avg       0.57      0.61      0.58        70
+    accuracy                           0.68        50
+   macro avg       0.73      0.72      0.72        50
+weighted avg       0.71      0.68      0.68        50
 
 \nTest Set Performance Summary (Overall Best Model):
-  AI-Generated: F1=0.7692, Precision=0.7143, Recall=0.8333
-  Authentic: F1=0.7160, Precision=0.6444, Recall=0.8056
-  Generic: F1=0.2424, Precision=0.3636, Recall=0.1818
-\n  Overall Test: F1=0.5763, Accuracy=0.6143
+  AI-Generated: F1=0.9000, Precision=0.9000, Recall=0.9000
+  Authentic: F1=0.6500, Precision=0.7647, Recall=0.5652
+  Generic: F1=0.6000, Precision=0.5217, Recall=0.7059
+\n  Overall Test: F1=0.6830, Accuracy=0.6800
+\nSaving overall best model and tokenizer...
+Model weights saved in ./roberta_classifier_cv/model.safetensors
+tokenizer config file saved in ./roberta_classifier_cv/tokenizer_config.json
+Special tokens file saved in ./roberta_classifier_cv/special_tokens_map.json
+"""
+
+
+"""
+Starting RoBERTa model training with 5-fold cross-validation
+Model: roberta-base, Max Length: 384, Batch Size: 8 (Train), 16 (Eval)
+Gradient Accumulation Steps: 2
+Learning Rate: 4e-05, Epochs per fold: 8
+Loading data...
+Successfully loaded data with cp1252 encoding.
+Loaded 399 samples with 3 classes: ['AI-Generated' 'Authentic' 'Generic']
+Train/CV set size: 319, Test set size: 80
+loading file vocab.json from cache at /root/.cache/huggingface/hub/models--roberta-base/snapshots/e2da8e2f811d1448a5b465c236feacd80ffbac7b/vocab.json
+loading file merges.txt from cache at /root/.cache/huggingface/hub/models--roberta-base/snapshots/e2da8e2f811d1448a5b465c236feacd80ffbac7b/merges.txt
+loading file added_tokens.json from cache at None
+loading file special_tokens_map.json from cache at None
+loading file tokenizer_config.json from cache at /root/.cache/huggingface/hub/models--roberta-base/snapshots/e2da8e2f811d1448a5b465c236feacd80ffbac7b/tokenizer_config.json
+loading file tokenizer.json from cache at /root/.cache/huggingface/hub/models--roberta-base/snapshots/e2da8e2f811d1448a5b465c236feacd80ffbac7b/tokenizer.json
+loading file chat_template.jinja from cache at None
+loading configuration file config.json from cache at /root/.cache/huggingface/hub/models--roberta-base/snapshots/e2da8e2f811d1448a5b465c236feacd80ffbac7b/config.json
+Model config RobertaConfig {
+  "architectures": [
+    "RobertaForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "bos_token_id": 0,
+  "classifier_dropout": null,
+  "eos_token_id": 2,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "layer_norm_eps": 1e-05,
+  "max_position_embeddings": 514,
+  "model_type": "roberta",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 1,
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.52.4",
+  "type_vocab_size": 1,
+  "use_cache": true,
+  "vocab_size": 50265
+}
+
+Using device: cuda
+\n==================================================\nTraining Fold 1/5\n==================================================
+Map: 100%
+ 255/255 [00:01<00:00, 166.36 examples/s]
+Map: 100%
+ 64/64 [00:00<00:00, 126.83 examples/s]
+loading configuration file config.json from cache at /root/.cache/huggingface/hub/models--roberta-base/snapshots/e2da8e2f811d1448a5b465c236feacd80ffbac7b/config.json
+Model config RobertaConfig {
+  "architectures": [
+    "RobertaForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "bos_token_id": 0,
+  "classifier_dropout": null,
+  "eos_token_id": 2,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "id2label": {
+    "0": "AI-Generated",
+    "1": "Authentic",
+    "2": "Generic"
+  },
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "label2id": {
+    "AI-Generated": 0,
+    "Authentic": 1,
+    "Generic": 2
+  },
+  "layer_norm_eps": 1e-05,
+  "max_position_embeddings": 514,
+  "model_type": "roberta",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 1,
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.52.4",
+  "type_vocab_size": 1,
+  "use_cache": true,
+  "vocab_size": 50265
+}
+
+loading weights file model.safetensors from cache at /root/.cache/huggingface/hub/models--roberta-base/snapshots/e2da8e2f811d1448a5b465c236feacd80ffbac7b/model.safetensors
+Some weights of the model checkpoint at roberta-base were not used when initializing RobertaForSequenceClassification: ['lm_head.bias', 'lm_head.dense.bias', 'lm_head.dense.weight', 'lm_head.layer_norm.bias', 'lm_head.layer_norm.weight']
+- This IS expected if you are initializing RobertaForSequenceClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing RobertaForSequenceClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+Some weights of RobertaForSequenceClassification were not initialized from the model checkpoint at roberta-base and are newly initialized: ['classifier.dense.bias', 'classifier.dense.weight', 'classifier.out_proj.bias', 'classifier.out_proj.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+PyTorch: setting up devices
+Using auto half precision backend
+The following columns in the Training set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+***** Running training *****
+  Num examples = 255
+  Num Epochs = 8
+  Instantaneous batch size per device = 8
+  Total train batch size (w. parallel, distributed & accumulation) = 16
+  Gradient Accumulation steps = 2
+  Total optimization steps = 128
+  Number of trainable parameters = 124,647,939
+Starting training for Fold 1...
+ [128/128 02:23, Epoch 8/8]
+Epoch	Training Loss	Validation Loss	Accuracy	F1	Precision	Recall
+1	1.108700	1.026283	0.515625	0.350838	0.265869	0.515625
+2	0.973100	0.960197	0.515625	0.350838	0.265869	0.515625
+3	0.934200	0.944366	0.609375	0.502211	0.440582	0.609375
+4	0.839000	0.968018	0.593750	0.553586	0.555563	0.593750
+5	0.760300	0.916008	0.609375	0.622862	0.671067	0.609375
+6	0.648100	0.829347	0.625000	0.577860	0.591846	0.625000
+7	0.558700	0.745094	0.703125	0.672632	0.732422	0.703125
+8	0.425200	0.792099	0.656250	0.663091	0.683101	0.656250
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Saving model checkpoint to ./roberta_results/fold_1/checkpoint-16
+Configuration saved in ./roberta_results/fold_1/checkpoint-16/config.json
+Model weights saved in ./roberta_results/fold_1/checkpoint-16/model.safetensors
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Saving model checkpoint to ./roberta_results/fold_1/checkpoint-32
+Configuration saved in ./roberta_results/fold_1/checkpoint-32/config.json
+Model weights saved in ./roberta_results/fold_1/checkpoint-32/model.safetensors
+Deleting older checkpoint [roberta_results/fold_1/checkpoint-112] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Saving model checkpoint to ./roberta_results/fold_1/checkpoint-48
+Configuration saved in ./roberta_results/fold_1/checkpoint-48/config.json
+Model weights saved in ./roberta_results/fold_1/checkpoint-48/model.safetensors
+Deleting older checkpoint [roberta_results/fold_1/checkpoint-16] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_1/checkpoint-64
+Configuration saved in ./roberta_results/fold_1/checkpoint-64/config.json
+Model weights saved in ./roberta_results/fold_1/checkpoint-64/model.safetensors
+Deleting older checkpoint [roberta_results/fold_1/checkpoint-32] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_1/checkpoint-80
+Configuration saved in ./roberta_results/fold_1/checkpoint-80/config.json
+Model weights saved in ./roberta_results/fold_1/checkpoint-80/model.safetensors
+Deleting older checkpoint [roberta_results/fold_1/checkpoint-48] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_1/checkpoint-96
+Configuration saved in ./roberta_results/fold_1/checkpoint-96/config.json
+Model weights saved in ./roberta_results/fold_1/checkpoint-96/model.safetensors
+Deleting older checkpoint [roberta_results/fold_1/checkpoint-64] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_1/checkpoint-112
+Configuration saved in ./roberta_results/fold_1/checkpoint-112/config.json
+Model weights saved in ./roberta_results/fold_1/checkpoint-112/model.safetensors
+Deleting older checkpoint [roberta_results/fold_1/checkpoint-80] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_1/checkpoint-128
+Configuration saved in ./roberta_results/fold_1/checkpoint-128/config.json
+Model weights saved in ./roberta_results/fold_1/checkpoint-128/model.safetensors
+Deleting older checkpoint [roberta_results/fold_1/checkpoint-96] due to args.save_total_limit
+
+
+Training completed. Do not forget to share your model on huggingface.co/models =)
+
+
+Loading best model from ./roberta_results/fold_1/checkpoint-112 (score: 0.6726317663817664).
+Deleting older checkpoint [roberta_results/fold_1/checkpoint-128] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+Evaluating best model of Fold 1 on its validation set...
+ [4/4 00:00]
+Fold 1 Validation: F1=0.6726, Accuracy=0.7031
+New best model found in Fold 1 with Val F1: 0.6726
+\n==================================================\nTraining Fold 2/5\n==================================================
+Map: 100%
+ 255/255 [00:01<00:00, 171.54 examples/s]
+Map: 100%
+ 64/64 [00:00<00:00, 78.61 examples/s]
+loading configuration file config.json from cache at /root/.cache/huggingface/hub/models--roberta-base/snapshots/e2da8e2f811d1448a5b465c236feacd80ffbac7b/config.json
+Model config RobertaConfig {
+  "architectures": [
+    "RobertaForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "bos_token_id": 0,
+  "classifier_dropout": null,
+  "eos_token_id": 2,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "id2label": {
+    "0": "AI-Generated",
+    "1": "Authentic",
+    "2": "Generic"
+  },
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "label2id": {
+    "AI-Generated": 0,
+    "Authentic": 1,
+    "Generic": 2
+  },
+  "layer_norm_eps": 1e-05,
+  "max_position_embeddings": 514,
+  "model_type": "roberta",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 1,
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.52.4",
+  "type_vocab_size": 1,
+  "use_cache": true,
+  "vocab_size": 50265
+}
+
+loading weights file model.safetensors from cache at /root/.cache/huggingface/hub/models--roberta-base/snapshots/e2da8e2f811d1448a5b465c236feacd80ffbac7b/model.safetensors
+Some weights of the model checkpoint at roberta-base were not used when initializing RobertaForSequenceClassification: ['lm_head.bias', 'lm_head.dense.bias', 'lm_head.dense.weight', 'lm_head.layer_norm.bias', 'lm_head.layer_norm.weight']
+- This IS expected if you are initializing RobertaForSequenceClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing RobertaForSequenceClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+Some weights of RobertaForSequenceClassification were not initialized from the model checkpoint at roberta-base and are newly initialized: ['classifier.dense.bias', 'classifier.dense.weight', 'classifier.out_proj.bias', 'classifier.out_proj.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+PyTorch: setting up devices
+Using auto half precision backend
+The following columns in the Training set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+***** Running training *****
+  Num examples = 255
+  Num Epochs = 8
+  Instantaneous batch size per device = 8
+  Total train batch size (w. parallel, distributed & accumulation) = 16
+  Gradient Accumulation steps = 2
+  Total optimization steps = 128
+  Number of trainable parameters = 124,647,939
+Starting training for Fold 2...
+ [112/128 01:59 < 00:17, 0.92 it/s, Epoch 7/8]
+Epoch	Training Loss	Validation Loss	Accuracy	F1	Precision	Recall
+1	1.086400	1.042168	0.500000	0.333333	0.250000	0.500000
+2	1.022200	0.975628	0.500000	0.333333	0.250000	0.500000
+3	0.928400	0.847935	0.578125	0.576206	0.596719	0.578125
+4	0.729900	0.719978	0.656250	0.612397	0.651292	0.656250
+5	0.674600	0.849169	0.593750	0.554330	0.556380	0.593750
+6	0.546400	0.789369	0.625000	0.600879	0.598916	0.625000
+7	0.471000	0.776360	0.609375	0.581355	0.622303	0.609375
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Saving model checkpoint to ./roberta_results/fold_2/checkpoint-16
+Configuration saved in ./roberta_results/fold_2/checkpoint-16/config.json
+Model weights saved in ./roberta_results/fold_2/checkpoint-16/model.safetensors
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Saving model checkpoint to ./roberta_results/fold_2/checkpoint-32
+Configuration saved in ./roberta_results/fold_2/checkpoint-32/config.json
+Model weights saved in ./roberta_results/fold_2/checkpoint-32/model.safetensors
+Deleting older checkpoint [roberta_results/fold_2/checkpoint-64] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_2/checkpoint-48
+Configuration saved in ./roberta_results/fold_2/checkpoint-48/config.json
+Model weights saved in ./roberta_results/fold_2/checkpoint-48/model.safetensors
+Deleting older checkpoint [roberta_results/fold_2/checkpoint-16] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_2/checkpoint-64
+Configuration saved in ./roberta_results/fold_2/checkpoint-64/config.json
+Model weights saved in ./roberta_results/fold_2/checkpoint-64/model.safetensors
+Deleting older checkpoint [roberta_results/fold_2/checkpoint-32] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_2/checkpoint-80
+Configuration saved in ./roberta_results/fold_2/checkpoint-80/config.json
+Model weights saved in ./roberta_results/fold_2/checkpoint-80/model.safetensors
+Deleting older checkpoint [roberta_results/fold_2/checkpoint-48] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_2/checkpoint-96
+Configuration saved in ./roberta_results/fold_2/checkpoint-96/config.json
+Model weights saved in ./roberta_results/fold_2/checkpoint-96/model.safetensors
+Deleting older checkpoint [roberta_results/fold_2/checkpoint-80] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_2/checkpoint-112
+Configuration saved in ./roberta_results/fold_2/checkpoint-112/config.json
+Model weights saved in ./roberta_results/fold_2/checkpoint-112/model.safetensors
+Deleting older checkpoint [roberta_results/fold_2/checkpoint-96] due to args.save_total_limit
+
+
+Training completed. Do not forget to share your model on huggingface.co/models =)
+
+
+Loading best model from ./roberta_results/fold_2/checkpoint-64 (score: 0.6123973371152788).
+Deleting older checkpoint [roberta_results/fold_2/checkpoint-112] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+Evaluating best model of Fold 2 on its validation set...
+ [4/4 00:00]
+Fold 2 Validation: F1=0.6124, Accuracy=0.6562
+\n==================================================\nTraining Fold 3/5\n==================================================
+Map: 100%
+ 255/255 [00:01<00:00, 170.18 examples/s]
+Map: 100%
+ 64/64 [00:00<00:00, 134.13 examples/s]
+loading configuration file config.json from cache at /root/.cache/huggingface/hub/models--roberta-base/snapshots/e2da8e2f811d1448a5b465c236feacd80ffbac7b/config.json
+Model config RobertaConfig {
+  "architectures": [
+    "RobertaForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "bos_token_id": 0,
+  "classifier_dropout": null,
+  "eos_token_id": 2,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "id2label": {
+    "0": "AI-Generated",
+    "1": "Authentic",
+    "2": "Generic"
+  },
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "label2id": {
+    "AI-Generated": 0,
+    "Authentic": 1,
+    "Generic": 2
+  },
+  "layer_norm_eps": 1e-05,
+  "max_position_embeddings": 514,
+  "model_type": "roberta",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 1,
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.52.4",
+  "type_vocab_size": 1,
+  "use_cache": true,
+  "vocab_size": 50265
+}
+
+loading weights file model.safetensors from cache at /root/.cache/huggingface/hub/models--roberta-base/snapshots/e2da8e2f811d1448a5b465c236feacd80ffbac7b/model.safetensors
+Some weights of the model checkpoint at roberta-base were not used when initializing RobertaForSequenceClassification: ['lm_head.bias', 'lm_head.dense.bias', 'lm_head.dense.weight', 'lm_head.layer_norm.bias', 'lm_head.layer_norm.weight']
+- This IS expected if you are initializing RobertaForSequenceClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing RobertaForSequenceClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+Some weights of RobertaForSequenceClassification were not initialized from the model checkpoint at roberta-base and are newly initialized: ['classifier.dense.bias', 'classifier.dense.weight', 'classifier.out_proj.bias', 'classifier.out_proj.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+PyTorch: setting up devices
+Using auto half precision backend
+The following columns in the Training set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+***** Running training *****
+  Num examples = 255
+  Num Epochs = 8
+  Instantaneous batch size per device = 8
+  Total train batch size (w. parallel, distributed & accumulation) = 16
+  Gradient Accumulation steps = 2
+  Total optimization steps = 128
+  Number of trainable parameters = 124,647,939
+Starting training for Fold 3...
+ [128/128 02:09, Epoch 8/8]
+Epoch	Training Loss	Validation Loss	Accuracy	F1	Precision	Recall
+1	1.075800	1.038597	0.500000	0.333333	0.250000	0.500000
+2	1.030400	1.011078	0.500000	0.333333	0.250000	0.500000
+3	0.981800	0.916765	0.593750	0.483845	0.478987	0.593750
+4	0.785500	0.705103	0.578125	0.500431	0.462813	0.578125
+5	0.609500	0.742791	0.640625	0.643792	0.650029	0.640625
+6	0.430100	0.830479	0.640625	0.640625	0.660833	0.640625
+7	0.269900	1.032565	0.593750	0.591775	0.635345	0.593750
+8	0.175900	1.079882	0.593750	0.594499	0.605497	0.593750
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Saving model checkpoint to ./roberta_results/fold_3/checkpoint-16
+Configuration saved in ./roberta_results/fold_3/checkpoint-16/config.json
+Model weights saved in ./roberta_results/fold_3/checkpoint-16/model.safetensors
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Saving model checkpoint to ./roberta_results/fold_3/checkpoint-32
+Configuration saved in ./roberta_results/fold_3/checkpoint-32/config.json
+Model weights saved in ./roberta_results/fold_3/checkpoint-32/model.safetensors
+Deleting older checkpoint [roberta_results/fold_3/checkpoint-128] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Saving model checkpoint to ./roberta_results/fold_3/checkpoint-48
+Configuration saved in ./roberta_results/fold_3/checkpoint-48/config.json
+Model weights saved in ./roberta_results/fold_3/checkpoint-48/model.safetensors
+Deleting older checkpoint [roberta_results/fold_3/checkpoint-16] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_3/checkpoint-64
+Configuration saved in ./roberta_results/fold_3/checkpoint-64/config.json
+Model weights saved in ./roberta_results/fold_3/checkpoint-64/model.safetensors
+Deleting older checkpoint [roberta_results/fold_3/checkpoint-32] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_3/checkpoint-80
+Configuration saved in ./roberta_results/fold_3/checkpoint-80/config.json
+Model weights saved in ./roberta_results/fold_3/checkpoint-80/model.safetensors
+Deleting older checkpoint [roberta_results/fold_3/checkpoint-48] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_3/checkpoint-96
+Configuration saved in ./roberta_results/fold_3/checkpoint-96/config.json
+Model weights saved in ./roberta_results/fold_3/checkpoint-96/model.safetensors
+Deleting older checkpoint [roberta_results/fold_3/checkpoint-64] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_3/checkpoint-112
+Configuration saved in ./roberta_results/fold_3/checkpoint-112/config.json
+Model weights saved in ./roberta_results/fold_3/checkpoint-112/model.safetensors
+Deleting older checkpoint [roberta_results/fold_3/checkpoint-96] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_3/checkpoint-128
+Configuration saved in ./roberta_results/fold_3/checkpoint-128/config.json
+Model weights saved in ./roberta_results/fold_3/checkpoint-128/model.safetensors
+Deleting older checkpoint [roberta_results/fold_3/checkpoint-112] due to args.save_total_limit
+
+
+Training completed. Do not forget to share your model on huggingface.co/models =)
+
+
+Loading best model from ./roberta_results/fold_3/checkpoint-80 (score: 0.6437924830067973).
+Deleting older checkpoint [roberta_results/fold_3/checkpoint-128] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+Evaluating best model of Fold 3 on its validation set...
+ [4/4 00:00]
+Fold 3 Validation: F1=0.6438, Accuracy=0.6406
+\n==================================================\nTraining Fold 4/5\n==================================================
+Map: 100%
+ 255/255 [00:01<00:00, 169.68 examples/s]
+Map: 100%
+ 64/64 [00:00<00:00, 143.81 examples/s]
+loading configuration file config.json from cache at /root/.cache/huggingface/hub/models--roberta-base/snapshots/e2da8e2f811d1448a5b465c236feacd80ffbac7b/config.json
+Model config RobertaConfig {
+  "architectures": [
+    "RobertaForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "bos_token_id": 0,
+  "classifier_dropout": null,
+  "eos_token_id": 2,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "id2label": {
+    "0": "AI-Generated",
+    "1": "Authentic",
+    "2": "Generic"
+  },
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "label2id": {
+    "AI-Generated": 0,
+    "Authentic": 1,
+    "Generic": 2
+  },
+  "layer_norm_eps": 1e-05,
+  "max_position_embeddings": 514,
+  "model_type": "roberta",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 1,
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.52.4",
+  "type_vocab_size": 1,
+  "use_cache": true,
+  "vocab_size": 50265
+}
+
+loading weights file model.safetensors from cache at /root/.cache/huggingface/hub/models--roberta-base/snapshots/e2da8e2f811d1448a5b465c236feacd80ffbac7b/model.safetensors
+Some weights of the model checkpoint at roberta-base were not used when initializing RobertaForSequenceClassification: ['lm_head.bias', 'lm_head.dense.bias', 'lm_head.dense.weight', 'lm_head.layer_norm.bias', 'lm_head.layer_norm.weight']
+- This IS expected if you are initializing RobertaForSequenceClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing RobertaForSequenceClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+Some weights of RobertaForSequenceClassification were not initialized from the model checkpoint at roberta-base and are newly initialized: ['classifier.dense.bias', 'classifier.dense.weight', 'classifier.out_proj.bias', 'classifier.out_proj.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+PyTorch: setting up devices
+Using auto half precision backend
+The following columns in the Training set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+***** Running training *****
+  Num examples = 255
+  Num Epochs = 8
+  Instantaneous batch size per device = 8
+  Total train batch size (w. parallel, distributed & accumulation) = 16
+  Gradient Accumulation steps = 2
+  Total optimization steps = 128
+  Number of trainable parameters = 124,647,939
+Starting training for Fold 4...
+ [128/128 02:10, Epoch 8/8]
+Epoch	Training Loss	Validation Loss	Accuracy	F1	Precision	Recall
+1	1.074700	1.035461	0.500000	0.333333	0.250000	0.500000
+2	1.047500	1.019745	0.500000	0.333333	0.250000	0.500000
+3	1.024700	0.971546	0.500000	0.333333	0.250000	0.500000
+4	0.908900	0.825207	0.609375	0.501738	0.483827	0.609375
+5	0.703200	0.785315	0.515625	0.503465	0.639805	0.515625
+6	0.504200	0.849427	0.578125	0.571343	0.644553	0.578125
+7	0.412600	0.790448	0.703125	0.698351	0.700372	0.703125
+8	0.297900	0.843606	0.656250	0.657790	0.668909	0.656250
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Saving model checkpoint to ./roberta_results/fold_4/checkpoint-16
+Configuration saved in ./roberta_results/fold_4/checkpoint-16/config.json
+Model weights saved in ./roberta_results/fold_4/checkpoint-16/model.safetensors
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Saving model checkpoint to ./roberta_results/fold_4/checkpoint-32
+Configuration saved in ./roberta_results/fold_4/checkpoint-32/config.json
+Model weights saved in ./roberta_results/fold_4/checkpoint-32/model.safetensors
+Deleting older checkpoint [roberta_results/fold_4/checkpoint-80] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Saving model checkpoint to ./roberta_results/fold_4/checkpoint-48
+Configuration saved in ./roberta_results/fold_4/checkpoint-48/config.json
+Model weights saved in ./roberta_results/fold_4/checkpoint-48/model.safetensors
+Deleting older checkpoint [roberta_results/fold_4/checkpoint-32] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Saving model checkpoint to ./roberta_results/fold_4/checkpoint-64
+Configuration saved in ./roberta_results/fold_4/checkpoint-64/config.json
+Model weights saved in ./roberta_results/fold_4/checkpoint-64/model.safetensors
+Deleting older checkpoint [roberta_results/fold_4/checkpoint-16] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_4/checkpoint-80
+Configuration saved in ./roberta_results/fold_4/checkpoint-80/config.json
+Model weights saved in ./roberta_results/fold_4/checkpoint-80/model.safetensors
+Deleting older checkpoint [roberta_results/fold_4/checkpoint-48] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_4/checkpoint-96
+Configuration saved in ./roberta_results/fold_4/checkpoint-96/config.json
+Model weights saved in ./roberta_results/fold_4/checkpoint-96/model.safetensors
+Deleting older checkpoint [roberta_results/fold_4/checkpoint-64] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_4/checkpoint-112
+Configuration saved in ./roberta_results/fold_4/checkpoint-112/config.json
+Model weights saved in ./roberta_results/fold_4/checkpoint-112/model.safetensors
+Deleting older checkpoint [roberta_results/fold_4/checkpoint-80] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_4/checkpoint-128
+Configuration saved in ./roberta_results/fold_4/checkpoint-128/config.json
+Model weights saved in ./roberta_results/fold_4/checkpoint-128/model.safetensors
+Deleting older checkpoint [roberta_results/fold_4/checkpoint-96] due to args.save_total_limit
+
+
+Training completed. Do not forget to share your model on huggingface.co/models =)
+
+
+Loading best model from ./roberta_results/fold_4/checkpoint-112 (score: 0.6983505674243163).
+Deleting older checkpoint [roberta_results/fold_4/checkpoint-128] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 64
+  Batch size = 16
+Evaluating best model of Fold 4 on its validation set...
+ [4/4 00:00]
+Fold 4 Validation: F1=0.6984, Accuracy=0.7031
+New best model found in Fold 4 with Val F1: 0.6984
+\n==================================================\nTraining Fold 5/5\n==================================================
+Map: 100%
+ 256/256 [00:01<00:00, 167.62 examples/s]
+Map: 100%
+ 63/63 [00:00<00:00, 127.83 examples/s]
+loading configuration file config.json from cache at /root/.cache/huggingface/hub/models--roberta-base/snapshots/e2da8e2f811d1448a5b465c236feacd80ffbac7b/config.json
+Model config RobertaConfig {
+  "architectures": [
+    "RobertaForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "bos_token_id": 0,
+  "classifier_dropout": null,
+  "eos_token_id": 2,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "id2label": {
+    "0": "AI-Generated",
+    "1": "Authentic",
+    "2": "Generic"
+  },
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "label2id": {
+    "AI-Generated": 0,
+    "Authentic": 1,
+    "Generic": 2
+  },
+  "layer_norm_eps": 1e-05,
+  "max_position_embeddings": 514,
+  "model_type": "roberta",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 1,
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.52.4",
+  "type_vocab_size": 1,
+  "use_cache": true,
+  "vocab_size": 50265
+}
+
+loading weights file model.safetensors from cache at /root/.cache/huggingface/hub/models--roberta-base/snapshots/e2da8e2f811d1448a5b465c236feacd80ffbac7b/model.safetensors
+Some weights of the model checkpoint at roberta-base were not used when initializing RobertaForSequenceClassification: ['lm_head.bias', 'lm_head.dense.bias', 'lm_head.dense.weight', 'lm_head.layer_norm.bias', 'lm_head.layer_norm.weight']
+- This IS expected if you are initializing RobertaForSequenceClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing RobertaForSequenceClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+Some weights of RobertaForSequenceClassification were not initialized from the model checkpoint at roberta-base and are newly initialized: ['classifier.dense.bias', 'classifier.dense.weight', 'classifier.out_proj.bias', 'classifier.out_proj.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+PyTorch: setting up devices
+Using auto half precision backend
+The following columns in the Training set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+***** Running training *****
+  Num examples = 256
+  Num Epochs = 8
+  Instantaneous batch size per device = 8
+  Total train batch size (w. parallel, distributed & accumulation) = 16
+  Gradient Accumulation steps = 2
+  Total optimization steps = 128
+  Number of trainable parameters = 124,647,939
+Starting training for Fold 5...
+ [128/128 02:28, Epoch 8/8]
+Epoch	Training Loss	Validation Loss	Accuracy	F1	Precision	Recall
+1	1.085700	1.035249	0.507937	0.342189	0.257999	0.507937
+2	1.044200	0.968525	0.507937	0.342189	0.257999	0.507937
+3	0.966400	0.963080	0.507937	0.342189	0.257999	0.507937
+4	0.852100	0.758161	0.587302	0.530945	0.535053	0.587302
+5	0.650900	0.816545	0.523810	0.520427	0.520377	0.523810
+6	0.541100	1.108818	0.523810	0.495712	0.641876	0.523810
+7	0.619600	0.847349	0.571429	0.565494	0.614278	0.571429
+8	0.368800	0.905620	0.571429	0.569866	0.568947	0.571429
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 63
+  Batch size = 16
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Saving model checkpoint to ./roberta_results/fold_5/checkpoint-16
+Configuration saved in ./roberta_results/fold_5/checkpoint-16/config.json
+Model weights saved in ./roberta_results/fold_5/checkpoint-16/model.safetensors
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 63
+  Batch size = 16
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Saving model checkpoint to ./roberta_results/fold_5/checkpoint-32
+Configuration saved in ./roberta_results/fold_5/checkpoint-32/config.json
+Model weights saved in ./roberta_results/fold_5/checkpoint-32/model.safetensors
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 63
+  Batch size = 16
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Saving model checkpoint to ./roberta_results/fold_5/checkpoint-48
+Configuration saved in ./roberta_results/fold_5/checkpoint-48/config.json
+Model weights saved in ./roberta_results/fold_5/checkpoint-48/model.safetensors
+Deleting older checkpoint [roberta_results/fold_5/checkpoint-32] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 63
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_5/checkpoint-64
+Configuration saved in ./roberta_results/fold_5/checkpoint-64/config.json
+Model weights saved in ./roberta_results/fold_5/checkpoint-64/model.safetensors
+Deleting older checkpoint [roberta_results/fold_5/checkpoint-16] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 63
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_5/checkpoint-80
+Configuration saved in ./roberta_results/fold_5/checkpoint-80/config.json
+Model weights saved in ./roberta_results/fold_5/checkpoint-80/model.safetensors
+Deleting older checkpoint [roberta_results/fold_5/checkpoint-48] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 63
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_5/checkpoint-96
+Configuration saved in ./roberta_results/fold_5/checkpoint-96/config.json
+Model weights saved in ./roberta_results/fold_5/checkpoint-96/model.safetensors
+Deleting older checkpoint [roberta_results/fold_5/checkpoint-80] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 63
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_5/checkpoint-112
+Configuration saved in ./roberta_results/fold_5/checkpoint-112/config.json
+Model weights saved in ./roberta_results/fold_5/checkpoint-112/model.safetensors
+Deleting older checkpoint [roberta_results/fold_5/checkpoint-64] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 63
+  Batch size = 16
+Saving model checkpoint to ./roberta_results/fold_5/checkpoint-128
+Configuration saved in ./roberta_results/fold_5/checkpoint-128/config.json
+Model weights saved in ./roberta_results/fold_5/checkpoint-128/model.safetensors
+Deleting older checkpoint [roberta_results/fold_5/checkpoint-96] due to args.save_total_limit
+
+
+Training completed. Do not forget to share your model on huggingface.co/models =)
+
+
+Loading best model from ./roberta_results/fold_5/checkpoint-128 (score: 0.5698664651045603).
+Deleting older checkpoint [roberta_results/fold_5/checkpoint-112] due to args.save_total_limit
+The following columns in the Evaluation set don't have a corresponding argument in `RobertaForSequenceClassification.forward` and have been ignored: Paper Title, text, Review Type, Abstract, Review Text. If Paper Title, text, Review Type, Abstract, Review Text are not expected by `RobertaForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 63
+  Batch size = 16
+Evaluating best model of Fold 5 on its validation set...
+ [4/4 00:00]
+Fold 5 Validation: F1=0.5699, Accuracy=0.5714
+\nAverage Cross-Validation Results:
+  Average eval_loss: 0.7808
+  Average eval_accuracy: 0.6549
+  Average eval_f1: 0.6394
+  Average eval_precision: 0.6606
+  Average eval_recall: 0.6549
+\nLoading the overall best model for final evaluation...
+loading configuration file config.json from cache at /root/.cache/huggingface/hub/models--roberta-base/snapshots/e2da8e2f811d1448a5b465c236feacd80ffbac7b/config.json
+Model config RobertaConfig {
+  "architectures": [
+    "RobertaForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "bos_token_id": 0,
+  "classifier_dropout": null,
+  "eos_token_id": 2,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "id2label": {
+    "0": "AI-Generated",
+    "1": "Authentic",
+    "2": "Generic"
+  },
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "label2id": {
+    "AI-Generated": 0,
+    "Authentic": 1,
+    "Generic": 2
+  },
+  "layer_norm_eps": 1e-05,
+  "max_position_embeddings": 514,
+  "model_type": "roberta",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 1,
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.52.4",
+  "type_vocab_size": 1,
+  "use_cache": true,
+  "vocab_size": 50265
+}
+
+loading weights file model.safetensors from cache at /root/.cache/huggingface/hub/models--roberta-base/snapshots/e2da8e2f811d1448a5b465c236feacd80ffbac7b/model.safetensors
+Some weights of the model checkpoint at roberta-base were not used when initializing RobertaForSequenceClassification: ['lm_head.bias', 'lm_head.dense.bias', 'lm_head.dense.weight', 'lm_head.layer_norm.bias', 'lm_head.layer_norm.weight']
+- This IS expected if you are initializing RobertaForSequenceClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing RobertaForSequenceClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+Some weights of RobertaForSequenceClassification were not initialized from the model checkpoint at roberta-base and are newly initialized: ['classifier.dense.bias', 'classifier.dense.weight', 'classifier.out_proj.bias', 'classifier.out_proj.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Training history plot saved to roberta_training_history_cv_best_fold.png
+\nPreparing test set for final evaluation...
+Map: 100%
+ 80/80 [00:00<00:00, 125.68 examples/s]
+Final Test Set Evaluation: 100%
+ 5/5 [00:01<00:00,  2.87it/s]
+  Test Set: Accuracy=0.7125, F1=0.7059, Precision=0.7117, Recall=0.7125
+Configuration saved in ./roberta_classifier_cv/config.json
+Confusion matrix plot saved to roberta_confusion_matrix_cv_test.png
+\nTest Set Performance Report (Overall Best Model):
+              precision    recall  f1-score   support
+
+AI-Generated       0.87      0.81      0.84        16
+   Authentic       0.69      0.80      0.74        41
+     Generic       0.65      0.48      0.55        23
+
+    accuracy                           0.71        80
+   macro avg       0.73      0.70      0.71        80
+weighted avg       0.71      0.71      0.71        80
+
+\nTest Set Performance Summary (Overall Best Model):
+  AI-Generated: F1=0.8387, Precision=0.8667, Recall=0.8125
+  Authentic: F1=0.7416, Precision=0.6875, Recall=0.8049
+  Generic: F1=0.5500, Precision=0.6471, Recall=0.4783
+\n  Overall Test: F1=0.7059, Accuracy=0.7125
+\nSaving overall best model and tokenizer...
+Model weights saved in ./roberta_classifier_cv/model.safetensors
+tokenizer config file saved in ./roberta_classifier_cv/tokenizer_config.json
+Special tokens file saved in ./roberta_classifier_cv/special_tokens_map.json
 """

@@ -21,11 +21,11 @@ import copy  # Added copy
 
 # Configuration
 MODEL_NAME = "distilbert-base-uncased"
-MAX_LENGTH = 512
+MAX_LENGTH = 384
 BATCH_SIZE = 16  # Batch size for training within a fold
 EVAL_BATCH_SIZE = BATCH_SIZE * 2  # Can be larger for evaluation
-LEARNING_RATE = 2e-5
-NUM_EPOCHS_PER_FOLD = 10  # Renamed for clarity
+LEARNING_RATE = 3e-5
+NUM_EPOCHS_PER_FOLD = 6  # Renamed for clarity
 CROSS_VAL_FOLDS = 5  # Number of cross-validation folds
 SEED = 42  # Combined SEED constant
 
@@ -421,10 +421,10 @@ if __name__ == "__main__":
 
 """
 Starting DistilBERT model training with 5-fold cross-validation.
-Model: distilbert-base-uncased, Max Length: 512, Batch Size: 16
-Learning Rate: 2e-05, Epochs per fold: 10
+Model: distilbert-base-uncased, Max Length: 384, Batch Size: 16
+Learning Rate: 3e-05, Epochs per fold: 6
 Loading and preprocessing data...
-Loaded 346 samples with 3 classes: ['AI-Generated' 'Authentic' 'Generic']
+Loaded 248 samples with 3 classes: ['AI-Generated' 'Authentic' 'Generic']
 /usr/local/lib/python3.11/dist-packages/huggingface_hub/utils/_auth.py:94: UserWarning: 
 The secret `HF_TOKEN` does not exist in your Colab secrets.
 To authenticate with the Hugging Face Hub, create a token in your settings tab (https://huggingface.co/settings/tokens), set it as secret in your Google Colab and restart your session.
@@ -435,177 +435,323 @@ Using device: cuda
 \n==================================================\nTraining Fold 1/5\n==================================================
 Tokenizing datasets for Fold 1...
 Map: 100%
- 220/220 [00:01<00:00, 208.75 examples/s]
+ 158/158 [00:00<00:00, 350.88 examples/s]
 Map: 100%
- 56/56 [00:00<00:00, 200.40 examples/s]
+ 40/40 [00:00<00:00, 230.23 examples/s]
 Some weights of DistilBertForSequenceClassification were not initialized from the model checkpoint at distilbert-base-uncased and are newly initialized: ['classifier.bias', 'classifier.weight', 'pre_classifier.bias', 'pre_classifier.weight']
 You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
 Starting training for Fold 1...
- [140/140 02:11, Epoch 10/10]
+ [60/60 00:38, Epoch 6/6]
 Epoch	Training Loss	Validation Loss	Accuracy	F1	Precision	Recall
-1	0.999500	0.950893	0.517857	0.353361	0.268176	0.517857
-2	0.896200	0.857361	0.607143	0.494494	0.473039	0.607143
-3	0.765900	0.787576	0.642857	0.529524	0.458075	0.642857
-4	0.661900	0.727502	0.678571	0.602742	0.770651	0.678571
-5	0.562300	0.688832	0.696429	0.653727	0.694792	0.696429
-6	0.500000	0.667872	0.714286	0.667532	0.739373	0.714286
-7	0.464500	0.671569	0.660714	0.654178	0.654533	0.660714
-8	0.394100	0.656399	0.696429	0.691593	0.688799	0.696429
-9	0.355500	0.658273	0.678571	0.676098	0.674513	0.678571
-10	0.331800	0.652672	0.678571	0.676098	0.674513	0.678571
-/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
-  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
-/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
-  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+1	1.031200	0.962915	0.450000	0.279310	0.202500	0.450000
+2	0.877200	0.829504	0.600000	0.554472	0.573810	0.600000
+3	0.728600	0.719617	0.700000	0.700000	0.700000	0.700000
+4	0.598700	0.656397	0.725000	0.725813	0.727647	0.725000
+5	0.521800	0.620984	0.725000	0.725813	0.727647	0.725000
+6	0.469800	0.612622	0.675000	0.673373	0.672672	0.675000
 /usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
   _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
 Evaluating best model of Fold 1 on its validation set...
  [2/2 00:00]
-Fold 1 Validation: F1=0.6916, Accuracy=0.6964
-New best model found in Fold 1 with Val F1: 0.6916
+Fold 1 Validation: F1=0.7258, Accuracy=0.7250
+New best model found in Fold 1 with Val F1: 0.7258
 \n==================================================\nTraining Fold 2/5\n==================================================
 Tokenizing datasets for Fold 2...
 Map: 100%
- 221/221 [00:01<00:00, 155.04 examples/s]
+ 158/158 [00:00<00:00, 617.22 examples/s]
 Map: 100%
- 55/55 [00:00<00:00, 142.57 examples/s]
+ 40/40 [00:00<00:00, 467.23 examples/s]
 Some weights of DistilBertForSequenceClassification were not initialized from the model checkpoint at distilbert-base-uncased and are newly initialized: ['classifier.bias', 'classifier.weight', 'pre_classifier.bias', 'pre_classifier.weight']
 You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
 Starting training for Fold 2...
- [112/140 02:52 < 00:43, 0.64 it/s, Epoch 8/10]
+ [60/60 00:46, Epoch 6/6]
 Epoch	Training Loss	Validation Loss	Accuracy	F1	Precision	Recall
-1	1.030800	0.955194	0.527273	0.364069	0.278017	0.527273
-2	0.920400	0.856383	0.527273	0.364069	0.278017	0.527273
-3	0.814500	0.785782	0.636364	0.528076	0.482197	0.636364
-4	0.715400	0.738201	0.672727	0.585564	0.646263	0.672727
-5	0.613900	0.711366	0.636364	0.615469	0.612902	0.636364
-6	0.534200	0.712236	0.618182	0.601595	0.603535	0.618182
-7	0.464000	0.704907	0.600000	0.610105	0.626141	0.600000
-8	0.409800	0.706622	0.545455	0.555555	0.568822	0.545455
+1	1.064200	0.983545	0.450000	0.279310	0.202500	0.450000
+2	0.930100	0.871521	0.450000	0.325521	0.288571	0.450000
+3	0.790500	0.745825	0.675000	0.630526	0.676667	0.675000
+4	0.687300	0.676562	0.650000	0.627273	0.637500	0.650000
+5	0.606300	0.634827	0.650000	0.627273	0.637500	0.650000
+6	0.563400	0.622705	0.700000	0.690000	0.696364	0.700000
 /usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
   _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
 /usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
   _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
 Evaluating best model of Fold 2 on its validation set...
  [2/2 00:00]
-Fold 2 Validation: F1=0.6155, Accuracy=0.6364
+Fold 2 Validation: F1=0.6900, Accuracy=0.7000
 \n==================================================\nTraining Fold 3/5\n==================================================
 Tokenizing datasets for Fold 3...
 Map: 100%
- 221/221 [00:00<00:00, 439.18 examples/s]
+ 158/158 [00:00<00:00, 432.50 examples/s]
 Map: 100%
- 55/55 [00:00<00:00, 427.55 examples/s]
+ 40/40 [00:00<00:00, 358.15 examples/s]
 Some weights of DistilBertForSequenceClassification were not initialized from the model checkpoint at distilbert-base-uncased and are newly initialized: ['classifier.bias', 'classifier.weight', 'pre_classifier.bias', 'pre_classifier.weight']
 You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
 Starting training for Fold 3...
- [140/140 03:26, Epoch 10/10]
+ [60/60 00:45, Epoch 6/6]
 Epoch	Training Loss	Validation Loss	Accuracy	F1	Precision	Recall
-1	1.058700	0.951163	0.527273	0.364069	0.278017	0.527273
-2	0.934000	0.860929	0.527273	0.364069	0.278017	0.527273
-3	0.829100	0.786488	0.636364	0.543301	0.784787	0.636364
-4	0.734700	0.698739	0.690909	0.651716	0.708658	0.690909
-5	0.664500	0.636790	0.727273	0.704556	0.734732	0.727273
-6	0.569800	0.609788	0.727273	0.709360	0.724444	0.727273
-7	0.498800	0.577763	0.727273	0.713154	0.730847	0.727273
-8	0.439000	0.560534	0.781818	0.779383	0.781629	0.781818
-9	0.403600	0.563504	0.800000	0.799465	0.801356	0.800000
-10	0.376900	0.558458	0.781818	0.779383	0.781629	0.781818
+1	1.058500	0.974829	0.450000	0.279310	0.202500	0.450000
+2	0.924800	0.914478	0.550000	0.433333	0.425000	0.550000
+3	0.827900	0.790649	0.725000	0.701061	0.744231	0.725000
+4	0.719700	0.728558	0.725000	0.701550	0.738000	0.725000
+5	0.637100	0.703662	0.725000	0.719077	0.722727	0.725000
+6	0.589900	0.691705	0.725000	0.719077	0.722727	0.725000
 /usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
   _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
 /usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
   _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
 Evaluating best model of Fold 3 on its validation set...
  [2/2 00:00]
-Fold 3 Validation: F1=0.7995, Accuracy=0.8000
-New best model found in Fold 3 with Val F1: 0.7995
+Fold 3 Validation: F1=0.7191, Accuracy=0.7250
 \n==================================================\nTraining Fold 4/5\n==================================================
 Tokenizing datasets for Fold 4...
 Map: 100%
- 221/221 [00:00<00:00, 422.91 examples/s]
+ 159/159 [00:00<00:00, 594.10 examples/s]
 Map: 100%
- 55/55 [00:00<00:00, 326.86 examples/s]
+ 39/39 [00:00<00:00, 476.25 examples/s]
 Some weights of DistilBertForSequenceClassification were not initialized from the model checkpoint at distilbert-base-uncased and are newly initialized: ['classifier.bias', 'classifier.weight', 'pre_classifier.bias', 'pre_classifier.weight']
 You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
 Starting training for Fold 4...
- [140/140 03:54, Epoch 10/10]
+ [60/60 00:47, Epoch 6/6]
 Epoch	Training Loss	Validation Loss	Accuracy	F1	Precision	Recall
-1	1.020100	0.977091	0.509091	0.343483	0.259174	0.509091
-2	0.917900	0.873717	0.509091	0.343483	0.259174	0.509091
-3	0.811500	0.797305	0.672727	0.577989	0.787475	0.672727
-4	0.702500	0.794722	0.654545	0.617080	0.637229	0.654545
-5	0.626300	0.736652	0.709091	0.700606	0.701573	0.709091
-6	0.542900	0.695270	0.727273	0.717778	0.727035	0.727273
-7	0.486500	0.684967	0.709091	0.695534	0.707401	0.709091
-8	0.428100	0.676682	0.763636	0.742730	0.793793	0.763636
-9	0.407000	0.689582	0.727273	0.723892	0.724783	0.727273
-10	0.369100	0.685324	0.727273	0.722885	0.726227	0.727273
-/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
-  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+1	1.055900	0.978465	0.461538	0.291498	0.213018	0.461538
+2	0.909300	0.872020	0.615385	0.531202	0.790210	0.615385
+3	0.770400	0.762188	0.641026	0.562821	0.633333	0.641026
+4	0.649700	0.696665	0.717949	0.701590	0.738608	0.717949
+5	0.572900	0.669490	0.717949	0.698396	0.752650	0.717949
+6	0.526200	0.654422	0.743590	0.731136	0.772894	0.743590
 /usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
   _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
 Evaluating best model of Fold 4 on its validation set...
  [2/2 00:00]
-Fold 4 Validation: F1=0.7427, Accuracy=0.7636
+Fold 4 Validation: F1=0.7311, Accuracy=0.7436
+New best model found in Fold 4 with Val F1: 0.7311
 \n==================================================\nTraining Fold 5/5\n==================================================
 Tokenizing datasets for Fold 5...
 Map: 100%
- 221/221 [00:00<00:00, 384.27 examples/s]
+ 159/159 [00:00<00:00, 177.75 examples/s]
 Map: 100%
- 55/55 [00:00<00:00, 320.17 examples/s]
+ 39/39 [00:00<00:00, 80.85 examples/s]
 Some weights of DistilBertForSequenceClassification were not initialized from the model checkpoint at distilbert-base-uncased and are newly initialized: ['classifier.bias', 'classifier.weight', 'pre_classifier.bias', 'pre_classifier.weight']
 You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
 Starting training for Fold 5...
- [140/140 03:45, Epoch 10/10]
+ [60/60 00:46, Epoch 6/6]
 Epoch	Training Loss	Validation Loss	Accuracy	F1	Precision	Recall
-1	1.016600	0.962988	0.509091	0.343483	0.259174	0.509091
-2	0.905200	0.897115	0.509091	0.343483	0.259174	0.509091
-3	0.808100	0.820894	0.672727	0.581218	0.800791	0.672727
-4	0.697500	0.752242	0.636364	0.619055	0.622112	0.636364
-5	0.605700	0.708987	0.672727	0.659993	0.675666	0.672727
-6	0.510300	0.663477	0.709091	0.689948	0.722807	0.709091
-7	0.446700	0.660920	0.690909	0.691866	0.693905	0.690909
-8	0.388300	0.646184	0.709091	0.698711	0.711212	0.709091
-9	0.354300	0.654140	0.709091	0.698711	0.711212	0.709091
-10	0.338300	0.651258	0.709091	0.698711	0.711212	0.709091
+1	1.043800	1.016864	0.435897	0.264652	0.190007	0.435897
+2	0.955500	0.894982	0.487179	0.356505	0.405405	0.487179
+3	0.826800	0.806528	0.692308	0.655564	0.731054	0.692308
+4	0.721000	0.685634	0.692308	0.641803	0.732669	0.692308
+5	0.627900	0.644750	0.717949	0.691498	0.753917	0.717949
+6	0.598400	0.624230	0.769231	0.750469	0.803419	0.769231
 /usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
   _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
 /usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
   _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
 Evaluating best model of Fold 5 on its validation set...
  [2/2 00:00]
-Fold 5 Validation: F1=0.6987, Accuracy=0.7091
+Fold 5 Validation: F1=0.7505, Accuracy=0.7692
+New best model found in Fold 5 with Val F1: 0.7505
 \nAverage Cross-Validation Results:
-  Average eval_loss: 0.6508
-  Average eval_accuracy: 0.7211
-  Average eval_f1: 0.7096
-  Average eval_precision: 0.7216
-  Average eval_recall: 0.7211
+  Average eval_loss: 0.6523
+  Average eval_accuracy: 0.7326
+  Average eval_f1: 0.7233
+  Average eval_precision: 0.7446
+  Average eval_recall: 0.7326
 \nLoading the overall best model for final evaluation...
 Some weights of DistilBertForSequenceClassification were not initialized from the model checkpoint at distilbert-base-uncased and are newly initialized: ['classifier.bias', 'classifier.weight', 'pre_classifier.bias', 'pre_classifier.weight']
 You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
 \nPreparing test set for final evaluation...
 Map: 100%
- 70/70 [00:00<00:00, 469.28 examples/s]
+ 50/50 [00:00<00:00, 451.17 examples/s]
 Evaluating overall best model on the Test set...
 Final Test Set Evaluation: 100%
- 3/3 [00:01<00:00,  3.10it/s]
-  Test Set: Accuracy=0.6857, F1=0.6797, Precision=0.6837, Recall=0.6857
+ 2/2 [00:00<00:00,  4.00it/s]
+  Test Set: Accuracy=0.6200, F1=0.5735, Precision=0.5795, Recall=0.6200
 \nTest Set Performance Report (Overall Best Model):
               precision    recall  f1-score   support
 
-AI-Generated       1.00      0.83      0.91        12
-   Authentic       0.69      0.81      0.74        36
-     Generic       0.50      0.41      0.45        22
+AI-Generated       0.83      1.00      0.91        10
+   Authentic       0.58      0.78      0.67        23
+     Generic       0.43      0.18      0.25        17
 
-    accuracy                           0.69        70
-   macro avg       0.73      0.68      0.70        70
-weighted avg       0.68      0.69      0.68        70
+    accuracy                           0.62        50
+   macro avg       0.61      0.65      0.61        50
+weighted avg       0.58      0.62      0.57        50
 
 \nTest Set Performance Summary (Overall Best Model):
-  AI-Generated: F1=0.9091, Precision=1.0000, Recall=0.8333
-  Authentic: F1=0.7436, Precision=0.6905, Recall=0.8056
-  Generic: F1=0.4500, Precision=0.5000, Recall=0.4091
-\n  Overall Test: F1=0.6797, Accuracy=0.6857
+  AI-Generated: F1=0.9091, Precision=0.8333, Recall=1.0000
+  Authentic: F1=0.6667, Precision=0.5806, Recall=0.7826
+  Generic: F1=0.2500, Precision=0.4286, Recall=0.1765
+\n  Overall Test: F1=0.5735, Accuracy=0.6200
+\nSaving overall best model and tokenizer...
+\nTraining, cross-validation, and final test evaluation complete.
+Best model and tokenizer saved to ./distilbert_classifier_cv
+Visualization files saved: distilbert_training_history_cv_best_fold.png, distilbert_confusion_matrix_cv_test.png
+"""
+
+
+"""
+Starting DistilBERT model training with 5-fold cross-validation.
+Model: distilbert-base-uncased, Max Length: 384, Batch Size: 16
+Learning Rate: 3e-05, Epochs per fold: 6
+Loading and preprocessing data...
+Loaded 399 samples with 3 classes: ['AI-Generated' 'Authentic' 'Generic']
+/usr/local/lib/python3.11/dist-packages/huggingface_hub/utils/_auth.py:94: UserWarning: 
+The secret `HF_TOKEN` does not exist in your Colab secrets.
+To authenticate with the Hugging Face Hub, create a token in your settings tab (https://huggingface.co/settings/tokens), set it as secret in your Google Colab and restart your session.
+You will be able to reuse this secret in all of your notebooks.
+Please note that authentication is recommended but still optional to access public models or datasets.
+  warnings.warn(
+Using device: cuda
+\n==================================================\nTraining Fold 1/5\n==================================================
+Tokenizing datasets for Fold 1...
+Map: 100%
+ 255/255 [00:00<00:00, 528.23 examples/s]
+Map: 100%
+ 64/64 [00:00<00:00, 469.99 examples/s]
+Some weights of DistilBertForSequenceClassification were not initialized from the model checkpoint at distilbert-base-uncased and are newly initialized: ['classifier.bias', 'classifier.weight', 'pre_classifier.bias', 'pre_classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Starting training for Fold 1...
+ [96/96 00:44, Epoch 6/6]
+Epoch	Training Loss	Validation Loss	Accuracy	F1	Precision	Recall
+1	1.034900	0.977623	0.515625	0.350838	0.265869	0.515625
+2	0.934300	0.866596	0.625000	0.520615	0.468056	0.625000
+3	0.803300	0.788883	0.640625	0.552462	0.740196	0.640625
+4	0.687100	0.776808	0.640625	0.571296	0.730329	0.640625
+5	0.612700	0.757717	0.671875	0.613364	0.758977	0.671875
+6	0.578200	0.760914	0.718750	0.688138	0.747494	0.718750
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Evaluating best model of Fold 1 on its validation set...
+ [2/2 00:00]
+Fold 1 Validation: F1=0.6881, Accuracy=0.7188
+New best model found in Fold 1 with Val F1: 0.6881
+\n==================================================\nTraining Fold 2/5\n==================================================
+Tokenizing datasets for Fold 2...
+Map: 100%
+ 255/255 [00:00<00:00, 447.75 examples/s]
+Map: 100%
+ 64/64 [00:00<00:00, 463.74 examples/s]
+Some weights of DistilBertForSequenceClassification were not initialized from the model checkpoint at distilbert-base-uncased and are newly initialized: ['classifier.bias', 'classifier.weight', 'pre_classifier.bias', 'pre_classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Starting training for Fold 2...
+ [96/96 01:05, Epoch 6/6]
+Epoch	Training Loss	Validation Loss	Accuracy	F1	Precision	Recall
+1	1.011500	0.954399	0.500000	0.333333	0.250000	0.500000
+2	0.887000	0.886215	0.578125	0.464496	0.474311	0.578125
+3	0.771700	0.792347	0.687500	0.628111	0.807692	0.687500
+4	0.662400	0.738750	0.687500	0.640642	0.736639	0.687500
+5	0.583900	0.718414	0.671875	0.627207	0.655320	0.671875
+6	0.535400	0.703655	0.703125	0.673899	0.722183	0.703125
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Evaluating best model of Fold 2 on its validation set...
+ [2/2 00:00]
+Fold 2 Validation: F1=0.6739, Accuracy=0.7031
+\n==================================================\nTraining Fold 3/5\n==================================================
+Tokenizing datasets for Fold 3...
+Map: 100%
+ 255/255 [00:00<00:00, 501.67 examples/s]
+Map: 100%
+ 64/64 [00:00<00:00, 476.79 examples/s]
+Some weights of DistilBertForSequenceClassification were not initialized from the model checkpoint at distilbert-base-uncased and are newly initialized: ['classifier.bias', 'classifier.weight', 'pre_classifier.bias', 'pre_classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Starting training for Fold 3...
+ [96/96 01:33, Epoch 6/6]
+Epoch	Training Loss	Validation Loss	Accuracy	F1	Precision	Recall
+1	1.029100	0.970848	0.500000	0.333333	0.250000	0.500000
+2	0.930700	0.882786	0.562500	0.443414	0.469792	0.562500
+3	0.829900	0.831921	0.640625	0.598633	0.695159	0.640625
+4	0.719700	0.773867	0.671875	0.646294	0.679167	0.671875
+5	0.621000	0.748499	0.671875	0.662678	0.680054	0.671875
+6	0.565700	0.742212	0.640625	0.635658	0.654167	0.640625
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Evaluating best model of Fold 3 on its validation set...
+ [2/2 00:00]
+Fold 3 Validation: F1=0.6627, Accuracy=0.6719
+\n==================================================\nTraining Fold 4/5\n==================================================
+Tokenizing datasets for Fold 4...
+Map: 100%
+ 255/255 [00:00<00:00, 469.22 examples/s]
+Map: 100%
+ 64/64 [00:00<00:00, 465.69 examples/s]
+Some weights of DistilBertForSequenceClassification were not initialized from the model checkpoint at distilbert-base-uncased and are newly initialized: ['classifier.bias', 'classifier.weight', 'pre_classifier.bias', 'pre_classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Starting training for Fold 4...
+ [96/96 01:19, Epoch 6/6]
+Epoch	Training Loss	Validation Loss	Accuracy	F1	Precision	Recall
+1	1.011200	0.981846	0.500000	0.333333	0.250000	0.500000
+2	0.910200	0.898193	0.625000	0.550325	0.590545	0.625000
+3	0.789800	0.918638	0.609375	0.517528	0.780702	0.609375
+4	0.682900	0.809565	0.656250	0.634264	0.658381	0.656250
+5	0.594500	0.803768	0.640625	0.629562	0.629220	0.640625
+6	0.541600	0.796362	0.640625	0.622255	0.640394	0.640625
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Evaluating best model of Fold 4 on its validation set...
+ [2/2 00:00]
+Fold 4 Validation: F1=0.6343, Accuracy=0.6562
+\n==================================================\nTraining Fold 5/5\n==================================================
+Tokenizing datasets for Fold 5...
+Map: 100%
+ 256/256 [00:00<00:00, 467.78 examples/s]
+Map: 100%
+ 63/63 [00:00<00:00, 448.94 examples/s]
+Some weights of DistilBertForSequenceClassification were not initialized from the model checkpoint at distilbert-base-uncased and are newly initialized: ['classifier.bias', 'classifier.weight', 'pre_classifier.bias', 'pre_classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Starting training for Fold 5...
+ [96/96 01:14, Epoch 6/6]
+Epoch	Training Loss	Validation Loss	Accuracy	F1	Precision	Recall
+1	1.010300	0.973710	0.507937	0.342189	0.257999	0.507937
+2	0.908900	0.887796	0.650794	0.575795	0.793063	0.650794
+3	0.776600	0.836000	0.634921	0.538370	0.747497	0.634921
+4	0.672700	0.788001	0.634921	0.579191	0.691643	0.634921
+5	0.591300	0.785594	0.634921	0.579191	0.691643	0.634921
+6	0.540000	0.771967	0.619048	0.567619	0.605820	0.619048
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Evaluating best model of Fold 5 on its validation set...
+ [2/2 00:00]
+Fold 5 Validation: F1=0.5792, Accuracy=0.6349
+\nAverage Cross-Validation Results:
+  Average eval_loss: 0.7621
+  Average eval_accuracy: 0.6770
+  Average eval_f1: 0.6476
+  Average eval_precision: 0.7000
+  Average eval_recall: 0.6770
+\nLoading the overall best model for final evaluation...
+Some weights of DistilBertForSequenceClassification were not initialized from the model checkpoint at distilbert-base-uncased and are newly initialized: ['classifier.bias', 'classifier.weight', 'pre_classifier.bias', 'pre_classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+\nPreparing test set for final evaluation...
+Map: 100%
+ 80/80 [00:00<00:00, 444.99 examples/s]
+Evaluating overall best model on the Test set...
+Final Test Set Evaluation: 100%
+ 3/3 [00:00<00:00,  3.60it/s]
+  Test Set: Accuracy=0.6750, F1=0.6106, Precision=0.7033, Recall=0.6750
+\nTest Set Performance Report (Overall Best Model):
+              precision    recall  f1-score   support
+
+AI-Generated       0.80      0.75      0.77        16
+   Authentic       0.64      0.95      0.76        41
+     Generic       0.75      0.13      0.22        23
+
+    accuracy                           0.68        80
+   macro avg       0.73      0.61      0.59        80
+weighted avg       0.70      0.68      0.61        80
+
+\nTest Set Performance Summary (Overall Best Model):
+  AI-Generated: F1=0.7742, Precision=0.8000, Recall=0.7500
+  Authentic: F1=0.7647, Precision=0.6393, Recall=0.9512
+  Generic: F1=0.2222, Precision=0.7500, Recall=0.1304
+\n  Overall Test: F1=0.6106, Accuracy=0.6750
 \nSaving overall best model and tokenizer...
 \nTraining, cross-validation, and final test evaluation complete.
 Best model and tokenizer saved to ./distilbert_classifier_cv

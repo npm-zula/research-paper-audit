@@ -19,10 +19,10 @@ np.random.seed(SEED)  # Add for sklearn and numpy consistency
 # Configuration
 CROSS_VAL_FOLDS = 5
 MODEL_NAME = 'bert-base-uncased'
-MAX_LENGTH = 512
-BATCH_SIZE = 8
-LEARNING_RATE = 2e-5
-NUM_EPOCHS = 10  # Number of epochs per fold
+MAX_LENGTH = 384
+BATCH_SIZE = 32
+LEARNING_RATE = 4e-5
+NUM_EPOCHS = 7  # Number of epochs per fold
 
 # Define the Dataset class
 
@@ -105,15 +105,15 @@ def train_model():
     # Load and preprocess data with different encoding
     try:
         # Try reading with 'latin-1' encoding
-        # Assuming corpus-final.csv is in the same directory
-        df = pd.read_csv('/content/corpus-final.csv', encoding='latin-1')
+        # Assuming corpus-thefinal.csv is in the same directory
+        df = pd.read_csv('/content/corpus-thefinal.csv', encoding='latin-1')
     except:
         try:
             # If that fails, try with 'cp1252' encoding
-            df = pd.read_csv('/content/corpus-final.csv', encoding='cp1252')
+            df = pd.read_csv('/content/corpus-thefinal.csv', encoding='cp1252')
         except:
             # If all else fails, try with utf-8 and error handling
-            df = pd.read_csv('/content/corpus-final.csv',
+            df = pd.read_csv('/content/corpus-thefinal.csv',
                              encoding='utf-8', errors='replace')
 
     # Clean the text data
@@ -369,260 +369,239 @@ if __name__ == "__main__":
     print(f"Best model and tokenizer saved to ./bert_classifier_cv")
     print("Visualization files saved: bert_training_history_cv_best_fold.png, bert_confusion_matrix_cv_test.png")
 
-
 """
 Starting BERT model training with 5-fold cross-validation.
-Model: bert-base-uncased, Max Length: 512, Batch Size: 8
-Learning Rate: 2e-05, Epochs per fold: 10
+Model: bert-base-uncased, Max Length: 384, Batch Size: 16
+Learning Rate: 3e-05, Epochs per fold: 6
 Using device: cuda
 \n==================================================\nTraining Fold 1/5\n==================================================
-
 Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-uncased and are newly initialized: ['classifier.bias', 'classifier.weight']
 You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
-Fold 1, Epoch 1/10: 100%|██████████| 28/28 [00:21<00:00,  1.30it/s]
-
-Fold 1, Epoch 1: Train Loss: 1.0145, Val Loss: 0.9913, Val Acc: 0.5179, Val F1: 0.3534
-
-Fold 1, Epoch 2/10: 100%|██████████| 28/28 [00:20<00:00,  1.35it/s]
-
-Fold 1, Epoch 2: Train Loss: 0.9444, Val Loss: 0.9379, Val Acc: 0.5357, Val F1: 0.3900
-
-Fold 1, Epoch 3/10: 100%|██████████| 28/28 [00:20<00:00,  1.37it/s]
-
-Fold 1, Epoch 3: Train Loss: 0.8539, Val Loss: 0.8434, Val Acc: 0.5000, Val F1: 0.5111
-
-Fold 1, Epoch 4/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 1, Epoch 4: Train Loss: 0.7003, Val Loss: 0.7030, Val Acc: 0.6964, Val F1: 0.6678
-
-Fold 1, Epoch 5/10: 100%|██████████| 28/28 [00:20<00:00,  1.34it/s]
-
-Fold 1, Epoch 5: Train Loss: 0.4980, Val Loss: 0.6584, Val Acc: 0.6964, Val F1: 0.6801
-
-Fold 1, Epoch 6/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 1, Epoch 6: Train Loss: 0.3398, Val Loss: 0.7536, Val Acc: 0.6250, Val F1: 0.5237
-
-Fold 1, Epoch 7/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 1, Epoch 7: Train Loss: 0.2576, Val Loss: 0.7215, Val Acc: 0.5536, Val F1: 0.5656
-
-Fold 1, Epoch 8/10: 100%|██████████| 28/28 [00:20<00:00,  1.37it/s]
-
-Fold 1, Epoch 8: Train Loss: 0.1599, Val Loss: 0.7405, Val Acc: 0.6964, Val F1: 0.6866
-
-Fold 1, Epoch 9/10: 100%|██████████| 28/28 [00:20<00:00,  1.37it/s]
-
-Fold 1, Epoch 9: Train Loss: 0.1071, Val Loss: 0.7843, Val Acc: 0.6786, Val F1: 0.6859
-
-Fold 1, Epoch 10/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 1, Epoch 10: Train Loss: 0.0915, Val Loss: 0.9206, Val Acc: 0.6429, Val F1: 0.6472
-New best model found in Fold 1 with F1: 0.6472
+Fold 1, Epoch 1/6: 100%|██████████| 10/10 [00:10<00:00,  1.05s/it]
+Fold 1, Epoch 1: Train Loss: 1.0764, Val Loss: 1.0221, Val Acc: 0.4500, Val F1: 0.2793
+Fold 1, Epoch 2/6: 100%|██████████| 10/10 [00:11<00:00,  1.18s/it]
+Fold 1, Epoch 2: Train Loss: 1.0139, Val Loss: 0.9397, Val Acc: 0.4500, Val F1: 0.2793
+Fold 1, Epoch 3/6: 100%|██████████| 10/10 [00:10<00:00,  1.05s/it]
+Fold 1, Epoch 3: Train Loss: 0.9021, Val Loss: 0.8191, Val Acc: 0.5250, Val F1: 0.5299
+Fold 1, Epoch 4/6: 100%|██████████| 10/10 [00:10<00:00,  1.03s/it]
+Fold 1, Epoch 4: Train Loss: 0.7591, Val Loss: 0.8636, Val Acc: 0.5250, Val F1: 0.4308
+Fold 1, Epoch 5/6: 100%|██████████| 10/10 [00:10<00:00,  1.01s/it]
+Fold 1, Epoch 5: Train Loss: 0.6170, Val Loss: 0.6718, Val Acc: 0.6750, Val F1: 0.6641
+Fold 1, Epoch 6/6: 100%|██████████| 10/10 [00:10<00:00,  1.01s/it]
+Fold 1, Epoch 6: Train Loss: 0.4853, Val Loss: 0.6235, Val Acc: 0.6750, Val F1: 0.6778
+New best model found in Fold 1 with F1: 0.6778
 \n==================================================\nTraining Fold 2/5\n==================================================
-
 Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-uncased and are newly initialized: ['classifier.bias', 'classifier.weight']
 You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
-Fold 2, Epoch 1/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 2, Epoch 1: Train Loss: 1.0457, Val Loss: 0.9866, Val Acc: 0.5273, Val F1: 0.3641
-
-Fold 2, Epoch 2/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 2, Epoch 2: Train Loss: 0.9988, Val Loss: 0.9539, Val Acc: 0.5091, Val F1: 0.3558
-
-Fold 2, Epoch 3/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 2, Epoch 3: Train Loss: 0.9356, Val Loss: 0.8470, Val Acc: 0.6000, Val F1: 0.6064
-
-Fold 2, Epoch 4/10: 100%|██████████| 28/28 [00:20<00:00,  1.37it/s]
-
-Fold 2, Epoch 4: Train Loss: 0.7514, Val Loss: 0.7159, Val Acc: 0.6364, Val F1: 0.5900
-
-Fold 2, Epoch 5/10: 100%|██████████| 28/28 [00:20<00:00,  1.37it/s]
-
-Fold 2, Epoch 5: Train Loss: 0.5334, Val Loss: 0.7067, Val Acc: 0.6364, Val F1: 0.5536
-
-Fold 2, Epoch 6/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 2, Epoch 6: Train Loss: 0.4302, Val Loss: 0.8077, Val Acc: 0.6545, Val F1: 0.6061
-
-Fold 2, Epoch 7/10: 100%|██████████| 28/28 [00:20<00:00,  1.37it/s]
-
-Fold 2, Epoch 7: Train Loss: 0.2678, Val Loss: 0.8021, Val Acc: 0.5455, Val F1: 0.5510
-
-Fold 2, Epoch 8/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 2, Epoch 8: Train Loss: 0.1596, Val Loss: 1.0496, Val Acc: 0.6000, Val F1: 0.6029
-
-Fold 2, Epoch 9/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 2, Epoch 9: Train Loss: 0.1001, Val Loss: 1.0781, Val Acc: 0.5455, Val F1: 0.5427
-
-Fold 2, Epoch 10/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 2, Epoch 10: Train Loss: 0.0893, Val Loss: 1.1396, Val Acc: 0.6364, Val F1: 0.5922
+Fold 2, Epoch 1/6: 100%|██████████| 10/10 [00:10<00:00,  1.02s/it]
+Fold 2, Epoch 1: Train Loss: 1.1043, Val Loss: 1.0148, Val Acc: 0.5000, Val F1: 0.4015
+Fold 2, Epoch 2/6: 100%|██████████| 10/10 [00:10<00:00,  1.02s/it]
+Fold 2, Epoch 2: Train Loss: 0.9968, Val Loss: 0.9622, Val Acc: 0.3750, Val F1: 0.3008
+Fold 2, Epoch 3/6: 100%|██████████| 10/10 [00:10<00:00,  1.03s/it]
+Fold 2, Epoch 3: Train Loss: 0.8368, Val Loss: 0.8469, Val Acc: 0.4250, Val F1: 0.3719
+Fold 2, Epoch 4/6: 100%|██████████| 10/10 [00:10<00:00,  1.04s/it]
+Fold 2, Epoch 4: Train Loss: 0.7001, Val Loss: 0.8027, Val Acc: 0.6250, Val F1: 0.6048
+Fold 2, Epoch 5/6: 100%|██████████| 10/10 [00:10<00:00,  1.03s/it]
+Fold 2, Epoch 5: Train Loss: 0.5966, Val Loss: 0.9145, Val Acc: 0.5750, Val F1: 0.4595
+Fold 2, Epoch 6/6: 100%|██████████| 10/10 [00:10<00:00,  1.03s/it]
+Fold 2, Epoch 6: Train Loss: 0.4441, Val Loss: 0.6457, Val Acc: 0.7750, Val F1: 0.7764
+New best model found in Fold 2 with F1: 0.7764
 \n==================================================\nTraining Fold 3/5\n==================================================
-
 Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-uncased and are newly initialized: ['classifier.bias', 'classifier.weight']
 You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
-Fold 3, Epoch 1/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 3, Epoch 1: Train Loss: 1.0061, Val Loss: 0.8685, Val Acc: 0.6182, Val F1: 0.5069
-
-Fold 3, Epoch 2/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 3, Epoch 2: Train Loss: 0.8699, Val Loss: 0.8152, Val Acc: 0.5818, Val F1: 0.5032
-
-Fold 3, Epoch 3/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 3, Epoch 3: Train Loss: 0.7154, Val Loss: 0.7891, Val Acc: 0.6000, Val F1: 0.4830
-
-Fold 3, Epoch 4/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 3, Epoch 4: Train Loss: 0.6396, Val Loss: 0.6241, Val Acc: 0.6727, Val F1: 0.6214
-
-Fold 3, Epoch 5/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 3, Epoch 5: Train Loss: 0.4970, Val Loss: 0.6636, Val Acc: 0.6909, Val F1: 0.6932
-
-Fold 3, Epoch 6/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 3, Epoch 6: Train Loss: 0.4038, Val Loss: 0.6277, Val Acc: 0.7273, Val F1: 0.7314
-
-Fold 3, Epoch 7/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 3, Epoch 7: Train Loss: 0.2780, Val Loss: 0.7341, Val Acc: 0.6364, Val F1: 0.6438
-
-Fold 3, Epoch 8/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 3, Epoch 8: Train Loss: 0.2151, Val Loss: 0.9744, Val Acc: 0.6364, Val F1: 0.5589
-
-Fold 3, Epoch 9/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 3, Epoch 9: Train Loss: 0.1931, Val Loss: 0.6983, Val Acc: 0.6909, Val F1: 0.6961
-
-Fold 3, Epoch 10/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 3, Epoch 10: Train Loss: 0.1193, Val Loss: 0.7027, Val Acc: 0.7818, Val F1: 0.7786
-New best model found in Fold 3 with F1: 0.7786
+Fold 3, Epoch 1/6: 100%|██████████| 10/10 [00:10<00:00,  1.03s/it]
+Fold 3, Epoch 1: Train Loss: 1.0336, Val Loss: 0.9717, Val Acc: 0.4500, Val F1: 0.2793
+Fold 3, Epoch 2/6: 100%|██████████| 10/10 [00:10<00:00,  1.02s/it]
+Fold 3, Epoch 2: Train Loss: 0.8783, Val Loss: 0.8767, Val Acc: 0.6000, Val F1: 0.5394
+Fold 3, Epoch 3/6: 100%|██████████| 10/10 [00:10<00:00,  1.02s/it]
+Fold 3, Epoch 3: Train Loss: 0.6558, Val Loss: 0.8718, Val Acc: 0.5750, Val F1: 0.5785
+Fold 3, Epoch 4/6: 100%|██████████| 10/10 [00:10<00:00,  1.03s/it]
+Fold 3, Epoch 4: Train Loss: 0.4334, Val Loss: 0.9983, Val Acc: 0.5750, Val F1: 0.5611
+Fold 3, Epoch 5/6: 100%|██████████| 10/10 [00:10<00:00,  1.03s/it]
+Fold 3, Epoch 5: Train Loss: 0.2678, Val Loss: 1.1643, Val Acc: 0.6250, Val F1: 0.6224
+Fold 3, Epoch 6/6: 100%|██████████| 10/10 [00:10<00:00,  1.03s/it]
+Fold 3, Epoch 6: Train Loss: 0.1443, Val Loss: 1.4349, Val Acc: 0.6250, Val F1: 0.6132
 \n==================================================\nTraining Fold 4/5\n==================================================
-
 Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-uncased and are newly initialized: ['classifier.bias', 'classifier.weight']
 You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
-Fold 4, Epoch 1/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 4, Epoch 1: Train Loss: 1.0276, Val Loss: 0.9454, Val Acc: 0.5091, Val F1: 0.3435
-
-Fold 4, Epoch 2/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 4, Epoch 2: Train Loss: 0.9383, Val Loss: 0.9163, Val Acc: 0.5091, Val F1: 0.3435
-
-Fold 4, Epoch 3/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 4, Epoch 3: Train Loss: 0.7774, Val Loss: 0.8845, Val Acc: 0.5636, Val F1: 0.5600
-
-Fold 4, Epoch 4/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 4, Epoch 4: Train Loss: 0.5594, Val Loss: 0.8662, Val Acc: 0.6727, Val F1: 0.5738
-
-Fold 4, Epoch 5/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 4, Epoch 5: Train Loss: 0.3469, Val Loss: 0.9004, Val Acc: 0.5636, Val F1: 0.5666
-
-Fold 4, Epoch 6/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 4, Epoch 6: Train Loss: 0.1918, Val Loss: 1.1411, Val Acc: 0.4727, Val F1: 0.4908
-
-Fold 4, Epoch 7/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 4, Epoch 7: Train Loss: 0.1287, Val Loss: 1.4313, Val Acc: 0.4545, Val F1: 0.4370
-
-Fold 4, Epoch 8/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 4, Epoch 8: Train Loss: 0.0930, Val Loss: 1.1155, Val Acc: 0.6182, Val F1: 0.5980
-
-Fold 4, Epoch 9/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 4, Epoch 9: Train Loss: 0.0773, Val Loss: 1.5512, Val Acc: 0.4545, Val F1: 0.4546
-
-Fold 4, Epoch 10/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 4, Epoch 10: Train Loss: 0.0734, Val Loss: 1.2449, Val Acc: 0.5273, Val F1: 0.5403
+Fold 4, Epoch 1/6: 100%|██████████| 10/10 [00:10<00:00,  1.03s/it]
+Fold 4, Epoch 1: Train Loss: 1.0808, Val Loss: 1.0603, Val Acc: 0.4615, Val F1: 0.2915
+Fold 4, Epoch 2/6: 100%|██████████| 10/10 [00:10<00:00,  1.03s/it]
+Fold 4, Epoch 2: Train Loss: 1.0210, Val Loss: 1.0254, Val Acc: 0.4615, Val F1: 0.2915
+Fold 4, Epoch 3/6: 100%|██████████| 10/10 [00:10<00:00,  1.03s/it]
+Fold 4, Epoch 3: Train Loss: 0.9024, Val Loss: 0.8706, Val Acc: 0.5385, Val F1: 0.4725
+Fold 4, Epoch 4/6: 100%|██████████| 10/10 [00:10<00:00,  1.03s/it]
+Fold 4, Epoch 4: Train Loss: 0.6921, Val Loss: 0.7745, Val Acc: 0.5641, Val F1: 0.5741
+Fold 4, Epoch 5/6: 100%|██████████| 10/10 [00:10<00:00,  1.03s/it]
+Fold 4, Epoch 5: Train Loss: 0.4195, Val Loss: 0.8632, Val Acc: 0.5128, Val F1: 0.5248
+Fold 4, Epoch 6/6: 100%|██████████| 10/10 [00:10<00:00,  1.03s/it]
+Fold 4, Epoch 6: Train Loss: 0.2423, Val Loss: 1.1566, Val Acc: 0.5385, Val F1: 0.5495
 \n==================================================\nTraining Fold 5/5\n==================================================
-
 Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-uncased and are newly initialized: ['classifier.bias', 'classifier.weight']
 You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
-Fold 5, Epoch 1/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 5, Epoch 1: Train Loss: 1.0487, Val Loss: 0.9848, Val Acc: 0.5091, Val F1: 0.3435
-
-Fold 5, Epoch 2/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 5, Epoch 2: Train Loss: 0.9906, Val Loss: 0.9471, Val Acc: 0.5091, Val F1: 0.3435
-
-Fold 5, Epoch 3/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 5, Epoch 3: Train Loss: 0.9567, Val Loss: 1.2108, Val Acc: 0.3091, Val F1: 0.1752
-
-Fold 5, Epoch 4/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 5, Epoch 4: Train Loss: 0.8927, Val Loss: 0.8789, Val Acc: 0.5455, Val F1: 0.5221
-
-Fold 5, Epoch 5/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 5, Epoch 5: Train Loss: 0.6396, Val Loss: 0.8163, Val Acc: 0.5455, Val F1: 0.5105
-
-Fold 5, Epoch 6/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 5, Epoch 6: Train Loss: 0.4918, Val Loss: 0.7385, Val Acc: 0.6000, Val F1: 0.6094
-
-Fold 5, Epoch 7/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 5, Epoch 7: Train Loss: 0.3055, Val Loss: 0.8290, Val Acc: 0.5636, Val F1: 0.5707
-
-Fold 5, Epoch 8/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 5, Epoch 8: Train Loss: 0.2365, Val Loss: 0.9023, Val Acc: 0.5636, Val F1: 0.5817
-
-Fold 5, Epoch 9/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 5, Epoch 9: Train Loss: 0.1797, Val Loss: 0.8815, Val Acc: 0.6364, Val F1: 0.6490
-
-Fold 5, Epoch 10/10: 100%|██████████| 28/28 [00:20<00:00,  1.36it/s]
-
-Fold 5, Epoch 10: Train Loss: 0.1351, Val Loss: 0.9090, Val Acc: 0.6545, Val F1: 0.6639
+Fold 5, Epoch 1/6: 100%|██████████| 10/10 [00:10<00:00,  1.03s/it]
+Fold 5, Epoch 1: Train Loss: 1.0676, Val Loss: 0.9698, Val Acc: 0.4359, Val F1: 0.2745
+Fold 5, Epoch 2/6: 100%|██████████| 10/10 [00:10<00:00,  1.03s/it]
+Fold 5, Epoch 2: Train Loss: 0.9150, Val Loss: 0.8841, Val Acc: 0.6154, Val F1: 0.5304
+Fold 5, Epoch 3/6: 100%|██████████| 10/10 [00:10<00:00,  1.03s/it]
+Fold 5, Epoch 3: Train Loss: 0.7813, Val Loss: 0.8005, Val Acc: 0.6923, Val F1: 0.6960
+Fold 5, Epoch 4/6: 100%|██████████| 10/10 [00:10<00:00,  1.03s/it]
+Fold 5, Epoch 4: Train Loss: 0.6020, Val Loss: 0.6746, Val Acc: 0.7692, Val F1: 0.7629
+Fold 5, Epoch 5/6: 100%|██████████| 10/10 [00:10<00:00,  1.03s/it]
+Fold 5, Epoch 5: Train Loss: 0.4301, Val Loss: 0.6207, Val Acc: 0.7692, Val F1: 0.7618
+Fold 5, Epoch 6/6: 100%|██████████| 10/10 [00:10<00:00,  1.04s/it]
+Fold 5, Epoch 6: Train Loss: 0.3034, Val Loss: 0.4985, Val Acc: 0.8205, Val F1: 0.8179
+New best model found in Fold 5 with F1: 0.8179
 \nAverage Cross-Validation Results:
-  Average val_loss: 0.9833
-  Average val_accuracy: 0.6486
-  Average val_f1: 0.6445
-  Average val_precision: 0.6675
-  Average val_recall: 0.6486
-
+  Average val_loss: 0.8718
+  Average val_accuracy: 0.6868
+  Average val_f1: 0.6870
+  Average val_precision: 0.7175
+  Average val_recall: 0.6868
 Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-uncased and are newly initialized: ['classifier.bias', 'classifier.weight']
 You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
-
 \nSaving best model and tokenizer...
 \nPerforming final evaluation on the Test set...
-
-Evaluating on Test Set: 100%|██████████| 5/5 [00:02<00:00,  2.10it/s]
-
+Evaluating on Test Set: 100%|██████████| 2/2 [00:01<00:00,  1.49it/s]
 \nTest Set Performance Report:
               precision    recall  f1-score   support
 
-AI-Generated       0.83      0.83      0.83        12
-   Authentic       0.67      0.72      0.69        36
-     Generic       0.53      0.45      0.49        22
+AI-Generated       0.91      1.00      0.95        10
+   Authentic       0.83      0.65      0.73        23
+     Generic       0.62      0.76      0.68        17
 
-    accuracy                           0.66        70
-   macro avg       0.68      0.67      0.67        70
-weighted avg       0.65      0.66      0.65        70
+    accuracy                           0.76        50
+   macro avg       0.79      0.81      0.79        50
+weighted avg       0.78      0.76      0.76        50
 
 \nTest Set Performance Summary:
-  AI-Generated: F1=0.8333, Precision=0.8333, Recall=0.8333
-  Authentic: F1=0.6933, Precision=0.6667, Recall=0.7222
-  Generic: F1=0.4878, Precision=0.5263, Recall=0.4545
-\n  Overall Test: F1=0.6527, Accuracy=0.6571
+  AI-Generated: F1=0.9524, Precision=0.9091, Recall=1.0000
+  Authentic: F1=0.7317, Precision=0.8333, Recall=0.6522
+  Generic: F1=0.6842, Precision=0.6190, Recall=0.7647
+\n  Overall Test: F1=0.7597, Accuracy=0.7600
+\nTraining, cross-validation, and final test evaluation complete.
+Best model and tokenizer saved to ./bert_classifier_cv
+Visualization files saved: bert_training_history_cv_best_fold.png, bert_confusion_matrix_cv_test.png
+"""
+
+"""
+Starting BERT model training with 5-fold cross-validation.
+Model: bert-base-uncased, Max Length: 384, Batch Size: 32
+Learning Rate: 4e-05, Epochs per fold: 7
+Using device: cuda
+\n==================================================\nTraining Fold 1/5\n==================================================
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-uncased and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Fold 1, Epoch 1/7: 100%|██████████| 8/8 [00:15<00:00,  1.88s/it]
+Fold 1, Epoch 1: Train Loss: 1.0318, Val Loss: 1.0052, Val Acc: 0.5156, Val F1: 0.3508
+Fold 1, Epoch 2/7: 100%|██████████| 8/8 [00:15<00:00,  1.96s/it]
+Fold 1, Epoch 2: Train Loss: 1.0068, Val Loss: 0.9798, Val Acc: 0.5156, Val F1: 0.3508
+Fold 1, Epoch 3/7: 100%|██████████| 8/8 [00:15<00:00,  1.94s/it]
+Fold 1, Epoch 3: Train Loss: 0.9565, Val Loss: 0.9426, Val Acc: 0.5156, Val F1: 0.3508
+Fold 1, Epoch 4/7: 100%|██████████| 8/8 [00:15<00:00,  1.91s/it]
+Fold 1, Epoch 4: Train Loss: 0.8123, Val Loss: 0.8775, Val Acc: 0.6094, Val F1: 0.5135
+Fold 1, Epoch 5/7: 100%|██████████| 8/8 [00:14<00:00,  1.86s/it]
+Fold 1, Epoch 5: Train Loss: 0.6564, Val Loss: 0.8432, Val Acc: 0.6406, Val F1: 0.5807
+Fold 1, Epoch 6/7: 100%|██████████| 8/8 [00:14<00:00,  1.87s/it]
+Fold 1, Epoch 6: Train Loss: 0.4927, Val Loss: 0.8426, Val Acc: 0.6562, Val F1: 0.6384
+Fold 1, Epoch 7/7: 100%|██████████| 8/8 [00:15<00:00,  1.88s/it]
+Fold 1, Epoch 7: Train Loss: 0.3169, Val Loss: 0.8729, Val Acc: 0.6250, Val F1: 0.6171
+New best model found in Fold 1 with F1: 0.6171
+\n==================================================\nTraining Fold 2/5\n==================================================
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-uncased and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Fold 2, Epoch 1/7: 100%|██████████| 8/8 [00:15<00:00,  1.89s/it]
+Fold 2, Epoch 1: Train Loss: 1.0473, Val Loss: 1.0238, Val Acc: 0.5000, Val F1: 0.3333
+Fold 2, Epoch 2/7: 100%|██████████| 8/8 [00:15<00:00,  1.89s/it]
+Fold 2, Epoch 2: Train Loss: 1.0208, Val Loss: 1.0082, Val Acc: 0.5000, Val F1: 0.3333
+Fold 2, Epoch 3/7: 100%|██████████| 8/8 [00:15<00:00,  1.89s/it]
+Fold 2, Epoch 3: Train Loss: 0.9518, Val Loss: 0.9393, Val Acc: 0.5625, Val F1: 0.4514
+Fold 2, Epoch 4/7: 100%|██████████| 8/8 [00:15<00:00,  1.89s/it]
+Fold 2, Epoch 4: Train Loss: 0.8367, Val Loss: 0.9001, Val Acc: 0.5938, Val F1: 0.4838
+Fold 2, Epoch 5/7: 100%|██████████| 8/8 [00:15<00:00,  1.89s/it]
+Fold 2, Epoch 5: Train Loss: 0.6845, Val Loss: 0.8222, Val Acc: 0.6094, Val F1: 0.5018
+Fold 2, Epoch 6/7: 100%|██████████| 8/8 [00:15<00:00,  1.90s/it]
+Fold 2, Epoch 6: Train Loss: 0.5146, Val Loss: 0.9688, Val Acc: 0.5312, Val F1: 0.4554
+Fold 2, Epoch 7/7: 100%|██████████| 8/8 [00:15<00:00,  1.89s/it]
+Fold 2, Epoch 7: Train Loss: 0.3372, Val Loss: 0.9919, Val Acc: 0.5625, Val F1: 0.5563
+\n==================================================\nTraining Fold 3/5\n==================================================
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-uncased and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Fold 3, Epoch 1/7: 100%|██████████| 8/8 [00:15<00:00,  1.90s/it]
+Fold 3, Epoch 1: Train Loss: 1.0386, Val Loss: 1.0012, Val Acc: 0.5000, Val F1: 0.3333
+Fold 3, Epoch 2/7: 100%|██████████| 8/8 [00:15<00:00,  1.88s/it]
+Fold 3, Epoch 2: Train Loss: 0.9414, Val Loss: 0.9971, Val Acc: 0.4688, Val F1: 0.3889
+Fold 3, Epoch 3/7: 100%|██████████| 8/8 [00:15<00:00,  1.90s/it]
+Fold 3, Epoch 3: Train Loss: 0.8137, Val Loss: 0.8341, Val Acc: 0.5156, Val F1: 0.4574
+Fold 3, Epoch 4/7: 100%|██████████| 8/8 [00:15<00:00,  1.89s/it]
+Fold 3, Epoch 4: Train Loss: 0.6570, Val Loss: 0.8075, Val Acc: 0.5625, Val F1: 0.5338
+Fold 3, Epoch 5/7: 100%|██████████| 8/8 [00:15<00:00,  1.88s/it]
+Fold 3, Epoch 5: Train Loss: 0.5503, Val Loss: 0.9428, Val Acc: 0.5156, Val F1: 0.4585
+Fold 3, Epoch 6/7: 100%|██████████| 8/8 [00:15<00:00,  1.88s/it]
+Fold 3, Epoch 6: Train Loss: 0.4197, Val Loss: 0.9366, Val Acc: 0.5156, Val F1: 0.5157
+Fold 3, Epoch 7/7: 100%|██████████| 8/8 [00:15<00:00,  1.88s/it]
+Fold 3, Epoch 7: Train Loss: 0.2657, Val Loss: 1.1558, Val Acc: 0.5312, Val F1: 0.5372
+\n==================================================\nTraining Fold 4/5\n==================================================
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-uncased and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Fold 4, Epoch 1/7: 100%|██████████| 8/8 [00:15<00:00,  1.88s/it]
+Fold 4, Epoch 1: Train Loss: 1.0551, Val Loss: 1.0317, Val Acc: 0.5000, Val F1: 0.3333
+Fold 4, Epoch 2/7: 100%|██████████| 8/8 [00:15<00:00,  1.89s/it]
+Fold 4, Epoch 2: Train Loss: 1.0235, Val Loss: 1.0121, Val Acc: 0.5000, Val F1: 0.3333
+Fold 4, Epoch 3/7: 100%|██████████| 8/8 [00:15<00:00,  1.89s/it]
+Fold 4, Epoch 3: Train Loss: 0.9565, Val Loss: 0.9706, Val Acc: 0.5156, Val F1: 0.4279
+Fold 4, Epoch 4/7: 100%|██████████| 8/8 [00:15<00:00,  1.89s/it]
+Fold 4, Epoch 4: Train Loss: 0.8249, Val Loss: 0.9331, Val Acc: 0.4531, Val F1: 0.4201
+Fold 4, Epoch 5/7: 100%|██████████| 8/8 [00:15<00:00,  1.88s/it]
+Fold 4, Epoch 5: Train Loss: 0.6405, Val Loss: 0.8880, Val Acc: 0.4688, Val F1: 0.4745
+Fold 4, Epoch 6/7: 100%|██████████| 8/8 [00:15<00:00,  1.88s/it]
+Fold 4, Epoch 6: Train Loss: 0.4313, Val Loss: 1.1462, Val Acc: 0.5000, Val F1: 0.4750
+Fold 4, Epoch 7/7: 100%|██████████| 8/8 [00:15<00:00,  1.90s/it]
+Fold 4, Epoch 7: Train Loss: 0.2719, Val Loss: 1.2836, Val Acc: 0.5156, Val F1: 0.4919
+\n==================================================\nTraining Fold 5/5\n==================================================
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-uncased and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Fold 5, Epoch 1/7: 100%|██████████| 8/8 [00:15<00:00,  1.89s/it]
+Fold 5, Epoch 1: Train Loss: 1.0318, Val Loss: 1.0067, Val Acc: 0.5079, Val F1: 0.3422
+Fold 5, Epoch 2/7: 100%|██████████| 8/8 [00:15<00:00,  1.91s/it]
+Fold 5, Epoch 2: Train Loss: 0.9898, Val Loss: 1.0190, Val Acc: 0.5397, Val F1: 0.4797
+Fold 5, Epoch 3/7: 100%|██████████| 8/8 [00:15<00:00,  1.90s/it]
+Fold 5, Epoch 3: Train Loss: 0.8952, Val Loss: 0.9895, Val Acc: 0.5397, Val F1: 0.4265
+Fold 5, Epoch 4/7: 100%|██████████| 8/8 [00:15<00:00,  1.91s/it]
+Fold 5, Epoch 4: Train Loss: 0.7213, Val Loss: 0.9490, Val Acc: 0.5714, Val F1: 0.5633
+Fold 5, Epoch 5/7: 100%|██████████| 8/8 [00:15<00:00,  1.89s/it]
+Fold 5, Epoch 5: Train Loss: 0.6076, Val Loss: 0.9715, Val Acc: 0.6032, Val F1: 0.5878
+Fold 5, Epoch 6/7: 100%|██████████| 8/8 [00:15<00:00,  1.88s/it]
+Fold 5, Epoch 6: Train Loss: 0.4451, Val Loss: 1.0946, Val Acc: 0.6349, Val F1: 0.5650
+Fold 5, Epoch 7/7: 100%|██████████| 8/8 [00:15<00:00,  1.89s/it]
+Fold 5, Epoch 7: Train Loss: 0.3768, Val Loss: 1.0727, Val Acc: 0.5873, Val F1: 0.5713
+\nAverage Cross-Validation Results:
+  Average val_loss: 1.0754
+  Average val_accuracy: 0.5643
+  Average val_f1: 0.5548
+  Average val_precision: 0.5936
+  Average val_recall: 0.5643
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-uncased and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+\nSaving best model and tokenizer...
+\nPerforming final evaluation on the Test set...
+Evaluating on Test Set: 100%|██████████| 2/2 [00:02<00:00,  1.04s/it]
+\nTest Set Performance Report:
+              precision    recall  f1-score   support
+
+AI-Generated       0.90      0.56      0.69        16
+   Authentic       0.68      0.78      0.73        41
+     Generic       0.43      0.43      0.43        23
+
+    accuracy                           0.64        80
+   macro avg       0.67      0.59      0.62        80
+weighted avg       0.65      0.64      0.64        80
+
+\nTest Set Performance Summary:
+  AI-Generated: F1=0.6923, Precision=0.9000, Recall=0.5625
+  Authentic: F1=0.7273, Precision=0.6809, Recall=0.7805
+  Generic: F1=0.4348, Precision=0.4348, Recall=0.4348
+\n  Overall Test: F1=0.6362, Accuracy=0.6375
 \nTraining, cross-validation, and final test evaluation complete.
 Best model and tokenizer saved to ./bert_classifier_cv
 Visualization files saved: bert_training_history_cv_best_fold.png, bert_confusion_matrix_cv_test.png

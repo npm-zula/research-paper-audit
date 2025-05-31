@@ -40,13 +40,13 @@ if torch.cuda.is_available():
 
 # Configuration
 MODEL_NAME = "xlnet-base-cased"
-MAX_LENGTH = 512
-BATCH_SIZE = 8  # Per device train batch size
+MAX_LENGTH = 384
+BATCH_SIZE = 16  # Per device train batch size
 EVAL_BATCH_SIZE = BATCH_SIZE * 2  # Per device eval batch size
 # Effective batch size = BATCH_SIZE * GRADIENT_ACCUMULATION_STEPS
-GRADIENT_ACCUMULATION_STEPS = 4
-LEARNING_RATE = 2e-5
-NUM_EPOCHS_PER_FOLD = 15  # Renamed for clarity
+GRADIENT_ACCUMULATION_STEPS = 2
+LEARNING_RATE = 5e-5
+NUM_EPOCHS_PER_FOLD = 6  # Renamed for clarity
 WEIGHT_DECAY = 0.01
 WARMUP_RATIO = 0.1
 CROSS_VAL_FOLDS = 5  # Standardized to 5 folds
@@ -323,7 +323,7 @@ def explain_prediction(text, model, tokenizer, class_names, device):
 
 def train_model_with_cv():
     print("Loading data...")
-    df_full, class_names = load_data('corpus.csv')
+    df_full, class_names = load_data('/content/corpus-thefinal.csv')
     if df_full.empty:
         print("Error: No data loaded. Exiting.")
         return
@@ -390,7 +390,7 @@ def train_model_with_cv():
             warmup_ratio=WARMUP_RATIO,
             logging_dir=f'./xlnet_logs/fold_{fold+1}',
             logging_strategy="epoch",
-            evaluation_strategy="epoch",
+            eval_strategy="epoch",
             save_strategy="epoch",
             load_best_model_at_end=True,
             metric_for_best_model="f1",
@@ -544,15 +544,1019 @@ if __name__ == "__main__":
 
 
 """
+
 Starting XLNet model training with 5-fold cross-validation and Focal Loss
-Model: xlnet-base-cased, Max Length: 512, Batch Size (per device): 8
-Effective Batch Size: 32, Eval Batch Size: 16
-Learning Rate: 2e-05, Epochs per fold: 15
+Model: xlnet-base-cased, Max Length: 384, Batch Size (per device): 16
+Effective Batch Size: 64, Eval Batch Size: 32
+Learning Rate: 2e-05, Epochs per fold: 6
 Loading data...
 Failed to decode with cp1252.
 Successfully loaded data with latin-1 encoding.
-Loaded 346 samples with 3 classes: ['AI-Generated' 'Authentic' 'Generic']
-Train/CV set size: 294, Test set size: 52
+Loaded 248 samples with 3 classes: ['AI-Generated' 'Authentic' 'Generic']
+Train/CV set size: 210, Test set size: 38
+/usr/local/lib/python3.11/dist-packages/huggingface_hub/utils/_auth.py:94: UserWarning: 
+The secret `HF_TOKEN` does not exist in your Colab secrets.
+To authenticate with the Hugging Face Hub, create a token in your settings tab (https://huggingface.co/settings/tokens), set it as secret in your Google Colab and restart your session.
+You will be able to reuse this secret in all of your notebooks.
+Please note that authentication is recommended but still optional to access public models or datasets.
+  warnings.warn(
+spiece.model: 100%
+ 798k/798k [00:00<00:00, 5.22MB/s]
+tokenizer.json: 100%
+ 1.38M/1.38M [00:00<00:00, 7.46MB/s]
+loading file spiece.model from cache at /root/.cache/huggingface/hub/models--xlnet-base-cased/snapshots/ceaa69c7bc5e512b5007106a7ccbb7daf24b2c79/spiece.model
+loading file added_tokens.json from cache at None
+loading file special_tokens_map.json from cache at None
+loading file tokenizer_config.json from cache at None
+loading file tokenizer.json from cache at /root/.cache/huggingface/hub/models--xlnet-base-cased/snapshots/ceaa69c7bc5e512b5007106a7ccbb7daf24b2c79/tokenizer.json
+loading file chat_template.jinja from cache at None
+config.json: 100%
+ 760/760 [00:00<00:00, 44.4kB/s]
+loading configuration file config.json from cache at /root/.cache/huggingface/hub/models--xlnet-base-cased/snapshots/ceaa69c7bc5e512b5007106a7ccbb7daf24b2c79/config.json
+Model config XLNetConfig {
+  "architectures": [
+    "XLNetLMHeadModel"
+  ],
+  "attn_type": "bi",
+  "bi_data": false,
+  "bos_token_id": 1,
+  "clamp_len": -1,
+  "d_head": 64,
+  "d_inner": 3072,
+  "d_model": 768,
+  "dropout": 0.1,
+  "end_n_top": 5,
+  "eos_token_id": 2,
+  "ff_activation": "gelu",
+  "initializer_range": 0.02,
+  "layer_norm_eps": 1e-12,
+  "mem_len": null,
+  "model_type": "xlnet",
+  "n_head": 12,
+  "n_layer": 12,
+  "pad_token_id": 5,
+  "reuse_len": null,
+  "same_length": false,
+  "start_n_top": 5,
+  "summary_activation": "tanh",
+  "summary_last_dropout": 0.1,
+  "summary_type": "last",
+  "summary_use_proj": true,
+  "task_specific_params": {
+    "text-generation": {
+      "do_sample": true,
+      "max_length": 250
+    }
+  },
+  "transformers_version": "4.52.2",
+  "untie_r": true,
+  "use_mems_eval": true,
+  "use_mems_train": false,
+  "vocab_size": 32000
+}
+
+\n--- Fold 1/5 ---
+Map: 100%
+ 168/168 [00:01<00:00, 89.13 examples/s]
+Map: 100%
+ 42/42 [00:00<00:00, 86.40 examples/s]
+loading configuration file config.json from cache at /root/.cache/huggingface/hub/models--xlnet-base-cased/snapshots/ceaa69c7bc5e512b5007106a7ccbb7daf24b2c79/config.json
+Model config XLNetConfig {
+  "architectures": [
+    "XLNetLMHeadModel"
+  ],
+  "attn_type": "bi",
+  "bi_data": false,
+  "bos_token_id": 1,
+  "clamp_len": -1,
+  "d_head": 64,
+  "d_inner": 3072,
+  "d_model": 768,
+  "dropout": 0.1,
+  "end_n_top": 5,
+  "eos_token_id": 2,
+  "ff_activation": "gelu",
+  "id2label": {
+    "0": "LABEL_0",
+    "1": "LABEL_1",
+    "2": "LABEL_2"
+  },
+  "initializer_range": 0.02,
+  "label2id": {
+    "LABEL_0": 0,
+    "LABEL_1": 1,
+    "LABEL_2": 2
+  },
+  "layer_norm_eps": 1e-12,
+  "mem_len": null,
+  "model_type": "xlnet",
+  "n_head": 12,
+  "n_layer": 12,
+  "pad_token_id": 5,
+  "reuse_len": null,
+  "same_length": false,
+  "start_n_top": 5,
+  "summary_activation": "tanh",
+  "summary_last_dropout": 0.1,
+  "summary_type": "last",
+  "summary_use_proj": true,
+  "task_specific_params": {
+    "text-generation": {
+      "do_sample": true,
+      "max_length": 250
+    }
+  },
+  "transformers_version": "4.52.2",
+  "untie_r": true,
+  "use_mems_eval": true,
+  "use_mems_train": false,
+  "vocab_size": 32000
+}
+
+Xet Storage is enabled for this repo, but the 'hf_xet' package is not installed. Falling back to regular HTTP download. For better performance, install the package with: `pip install huggingface_hub[hf_xet]` or `pip install hf_xet`
+WARNING:huggingface_hub.file_download:Xet Storage is enabled for this repo, but the 'hf_xet' package is not installed. Falling back to regular HTTP download. For better performance, install the package with: `pip install huggingface_hub[hf_xet]` or `pip install hf_xet`
+pytorch_model.bin: 100%
+ 467M/467M [00:04<00:00, 109MB/s]
+loading weights file pytorch_model.bin from cache at /root/.cache/huggingface/hub/models--xlnet-base-cased/snapshots/ceaa69c7bc5e512b5007106a7ccbb7daf24b2c79/pytorch_model.bin
+Attempting to create safetensors variant
+Some weights of the model checkpoint at xlnet-base-cased were not used when initializing XLNetForSequenceClassification: ['lm_loss.bias', 'lm_loss.weight']
+- This IS expected if you are initializing XLNetForSequenceClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing XLNetForSequenceClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+Some weights of XLNetForSequenceClassification were not initialized from the model checkpoint at xlnet-base-cased and are newly initialized: ['logits_proj.bias', 'logits_proj.weight', 'sequence_summary.summary.bias', 'sequence_summary.summary.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+PyTorch: setting up devices
+<ipython-input-1-e41307206d80>:81: FutureWarning: `tokenizer` is deprecated and will be removed in version 5.0.0 for `CustomTrainer.__init__`. Use `processing_class` instead.
+  super().__init__(*args, **kwargs)
+Safetensors PR exists
+Xet Storage is enabled for this repo, but the 'hf_xet' package is not installed. Falling back to regular HTTP download. For better performance, install the package with: `pip install huggingface_hub[hf_xet]` or `pip install hf_xet`
+WARNING:huggingface_hub.file_download:Xet Storage is enabled for this repo, but the 'hf_xet' package is not installed. Falling back to regular HTTP download. For better performance, install the package with: `pip install huggingface_hub[hf_xet]` or `pip install hf_xet`
+model.safetensors: 100%
+ 467M/467M [00:10<00:00, 69.0MB/s]
+Using auto half precision backend
+The following columns in the Training set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+***** Running training *****
+  Num examples = 168
+  Num Epochs = 6
+  Instantaneous batch size per device = 16
+  Total train batch size (w. parallel, distributed & accumulation) = 64
+  Gradient Accumulation steps = 4
+  Total optimization steps = 18
+  Number of trainable parameters = 117,311,235
+Starting training for fold 1...
+ [18/18 03:22, Epoch 6/6]
+Epoch	Training Loss	Validation Loss	Accuracy	F1	Precision	Recall
+1	1.897300	0.445024	0.333333	0.295156	0.265714	0.333333
+2	1.746800	0.424223	0.357143	0.310235	0.275458	0.357143
+3	1.629200	0.303016	0.642857	0.551501	0.781295	0.642857
+4	1.379900	0.240394	0.690476	0.615476	0.789446	0.690476
+5	1.134100	0.240659	0.523810	0.501232	0.528499	0.523810
+6	0.939800	0.211348	0.571429	0.564469	0.560091	0.571429
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_1/checkpoint-3
+Configuration saved in ./xlnet_results/fold_1/checkpoint-3/config.json
+Model weights saved in ./xlnet_results/fold_1/checkpoint-3/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_1/checkpoint-3/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_1/checkpoint-3/special_tokens_map.json
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_1/checkpoint-6
+Configuration saved in ./xlnet_results/fold_1/checkpoint-6/config.json
+Model weights saved in ./xlnet_results/fold_1/checkpoint-6/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_1/checkpoint-6/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_1/checkpoint-6/special_tokens_map.json
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_1/checkpoint-9
+Configuration saved in ./xlnet_results/fold_1/checkpoint-9/config.json
+Model weights saved in ./xlnet_results/fold_1/checkpoint-9/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_1/checkpoint-9/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_1/checkpoint-9/special_tokens_map.json
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_1/checkpoint-12
+Configuration saved in ./xlnet_results/fold_1/checkpoint-12/config.json
+Model weights saved in ./xlnet_results/fold_1/checkpoint-12/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_1/checkpoint-12/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_1/checkpoint-12/special_tokens_map.json
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_1/checkpoint-15
+Configuration saved in ./xlnet_results/fold_1/checkpoint-15/config.json
+Model weights saved in ./xlnet_results/fold_1/checkpoint-15/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_1/checkpoint-15/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_1/checkpoint-15/special_tokens_map.json
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_1/checkpoint-18
+Configuration saved in ./xlnet_results/fold_1/checkpoint-18/config.json
+Model weights saved in ./xlnet_results/fold_1/checkpoint-18/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_1/checkpoint-18/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_1/checkpoint-18/special_tokens_map.json
+
+
+Training completed. Do not forget to share your model on huggingface.co/models =)
+
+
+Loading best model from ./xlnet_results/fold_1/checkpoint-12 (score: 0.6154761904761905).
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+Evaluating fold 1 on its validation set...
+ [2/2 00:00]
+Fold 1 - Validation F1: 0.6155, Accuracy: 0.6905
+New best model found in fold 1 with F1: 0.6155
+\n--- Fold 2/5 ---
+Map: 100%
+ 168/168 [00:00<00:00, 357.71 examples/s]
+Map: 100%
+ 42/42 [00:00<00:00, 317.83 examples/s]
+loading configuration file config.json from cache at /root/.cache/huggingface/hub/models--xlnet-base-cased/snapshots/ceaa69c7bc5e512b5007106a7ccbb7daf24b2c79/config.json
+Model config XLNetConfig {
+  "architectures": [
+    "XLNetLMHeadModel"
+  ],
+  "attn_type": "bi",
+  "bi_data": false,
+  "bos_token_id": 1,
+  "clamp_len": -1,
+  "d_head": 64,
+  "d_inner": 3072,
+  "d_model": 768,
+  "dropout": 0.1,
+  "end_n_top": 5,
+  "eos_token_id": 2,
+  "ff_activation": "gelu",
+  "id2label": {
+    "0": "LABEL_0",
+    "1": "LABEL_1",
+    "2": "LABEL_2"
+  },
+  "initializer_range": 0.02,
+  "label2id": {
+    "LABEL_0": 0,
+    "LABEL_1": 1,
+    "LABEL_2": 2
+  },
+  "layer_norm_eps": 1e-12,
+  "mem_len": null,
+  "model_type": "xlnet",
+  "n_head": 12,
+  "n_layer": 12,
+  "pad_token_id": 5,
+  "reuse_len": null,
+  "same_length": false,
+  "start_n_top": 5,
+  "summary_activation": "tanh",
+  "summary_last_dropout": 0.1,
+  "summary_type": "last",
+  "summary_use_proj": true,
+  "task_specific_params": {
+    "text-generation": {
+      "do_sample": true,
+      "max_length": 250
+    }
+  },
+  "transformers_version": "4.52.2",
+  "untie_r": true,
+  "use_mems_eval": true,
+  "use_mems_train": false,
+  "vocab_size": 32000
+}
+
+loading weights file pytorch_model.bin from cache at /root/.cache/huggingface/hub/models--xlnet-base-cased/snapshots/ceaa69c7bc5e512b5007106a7ccbb7daf24b2c79/pytorch_model.bin
+Attempting to create safetensors variant
+Some weights of the model checkpoint at xlnet-base-cased were not used when initializing XLNetForSequenceClassification: ['lm_loss.bias', 'lm_loss.weight']
+- This IS expected if you are initializing XLNetForSequenceClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing XLNetForSequenceClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+Some weights of XLNetForSequenceClassification were not initialized from the model checkpoint at xlnet-base-cased and are newly initialized: ['logits_proj.bias', 'logits_proj.weight', 'sequence_summary.summary.bias', 'sequence_summary.summary.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+PyTorch: setting up devices
+<ipython-input-1-e41307206d80>:81: FutureWarning: `tokenizer` is deprecated and will be removed in version 5.0.0 for `CustomTrainer.__init__`. Use `processing_class` instead.
+  super().__init__(*args, **kwargs)
+Using auto half precision backend
+Starting training for fold 2...
+The following columns in the Training set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+***** Running training *****
+  Num examples = 168
+  Num Epochs = 6
+  Instantaneous batch size per device = 16
+  Total train batch size (w. parallel, distributed & accumulation) = 64
+  Gradient Accumulation steps = 4
+  Total optimization steps = 18
+  Number of trainable parameters = 117,311,235
+Safetensors PR exists
+ [18/18 03:25, Epoch 6/6]
+Epoch	Training Loss	Validation Loss	Accuracy	F1	Precision	Recall
+1	1.806900	0.509021	0.333333	0.285572	0.450000	0.333333
+2	1.757400	0.477038	0.428571	0.406542	0.452325	0.428571
+3	1.669700	0.432335	0.404762	0.320728	0.479022	0.404762
+4	1.434900	0.302419	0.785714	0.781599	0.801389	0.785714
+5	1.146400	0.305368	0.619048	0.559873	0.748873	0.619048
+6	1.007100	0.253005	0.642857	0.600515	0.613235	0.642857
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_2/checkpoint-3
+Configuration saved in ./xlnet_results/fold_2/checkpoint-3/config.json
+Model weights saved in ./xlnet_results/fold_2/checkpoint-3/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_2/checkpoint-3/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_2/checkpoint-3/special_tokens_map.json
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_2/checkpoint-6
+Configuration saved in ./xlnet_results/fold_2/checkpoint-6/config.json
+Model weights saved in ./xlnet_results/fold_2/checkpoint-6/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_2/checkpoint-6/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_2/checkpoint-6/special_tokens_map.json
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Saving model checkpoint to ./xlnet_results/fold_2/checkpoint-9
+Configuration saved in ./xlnet_results/fold_2/checkpoint-9/config.json
+Model weights saved in ./xlnet_results/fold_2/checkpoint-9/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_2/checkpoint-9/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_2/checkpoint-9/special_tokens_map.json
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_2/checkpoint-12
+Configuration saved in ./xlnet_results/fold_2/checkpoint-12/config.json
+Model weights saved in ./xlnet_results/fold_2/checkpoint-12/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_2/checkpoint-12/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_2/checkpoint-12/special_tokens_map.json
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_2/checkpoint-15
+Configuration saved in ./xlnet_results/fold_2/checkpoint-15/config.json
+Model weights saved in ./xlnet_results/fold_2/checkpoint-15/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_2/checkpoint-15/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_2/checkpoint-15/special_tokens_map.json
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_2/checkpoint-18
+Configuration saved in ./xlnet_results/fold_2/checkpoint-18/config.json
+Model weights saved in ./xlnet_results/fold_2/checkpoint-18/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_2/checkpoint-18/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_2/checkpoint-18/special_tokens_map.json
+
+
+Training completed. Do not forget to share your model on huggingface.co/models =)
+
+
+Loading best model from ./xlnet_results/fold_2/checkpoint-12 (score: 0.7815994614900225).
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+Evaluating fold 2 on its validation set...
+ [2/2 00:00]
+Fold 2 - Validation F1: 0.7816, Accuracy: 0.7857
+New best model found in fold 2 with F1: 0.7816
+\n--- Fold 3/5 ---
+Map: 100%
+ 168/168 [00:00<00:00, 355.84 examples/s]
+Map: 100%
+ 42/42 [00:00<00:00, 266.50 examples/s]
+loading configuration file config.json from cache at /root/.cache/huggingface/hub/models--xlnet-base-cased/snapshots/ceaa69c7bc5e512b5007106a7ccbb7daf24b2c79/config.json
+Model config XLNetConfig {
+  "architectures": [
+    "XLNetLMHeadModel"
+  ],
+  "attn_type": "bi",
+  "bi_data": false,
+  "bos_token_id": 1,
+  "clamp_len": -1,
+  "d_head": 64,
+  "d_inner": 3072,
+  "d_model": 768,
+  "dropout": 0.1,
+  "end_n_top": 5,
+  "eos_token_id": 2,
+  "ff_activation": "gelu",
+  "id2label": {
+    "0": "LABEL_0",
+    "1": "LABEL_1",
+    "2": "LABEL_2"
+  },
+  "initializer_range": 0.02,
+  "label2id": {
+    "LABEL_0": 0,
+    "LABEL_1": 1,
+    "LABEL_2": 2
+  },
+  "layer_norm_eps": 1e-12,
+  "mem_len": null,
+  "model_type": "xlnet",
+  "n_head": 12,
+  "n_layer": 12,
+  "pad_token_id": 5,
+  "reuse_len": null,
+  "same_length": false,
+  "start_n_top": 5,
+  "summary_activation": "tanh",
+  "summary_last_dropout": 0.1,
+  "summary_type": "last",
+  "summary_use_proj": true,
+  "task_specific_params": {
+    "text-generation": {
+      "do_sample": true,
+      "max_length": 250
+    }
+  },
+  "transformers_version": "4.52.2",
+  "untie_r": true,
+  "use_mems_eval": true,
+  "use_mems_train": false,
+  "vocab_size": 32000
+}
+
+loading weights file pytorch_model.bin from cache at /root/.cache/huggingface/hub/models--xlnet-base-cased/snapshots/ceaa69c7bc5e512b5007106a7ccbb7daf24b2c79/pytorch_model.bin
+Attempting to create safetensors variant
+Some weights of the model checkpoint at xlnet-base-cased were not used when initializing XLNetForSequenceClassification: ['lm_loss.bias', 'lm_loss.weight']
+- This IS expected if you are initializing XLNetForSequenceClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing XLNetForSequenceClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+Some weights of XLNetForSequenceClassification were not initialized from the model checkpoint at xlnet-base-cased and are newly initialized: ['logits_proj.bias', 'logits_proj.weight', 'sequence_summary.summary.bias', 'sequence_summary.summary.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+PyTorch: setting up devices
+<ipython-input-1-e41307206d80>:81: FutureWarning: `tokenizer` is deprecated and will be removed in version 5.0.0 for `CustomTrainer.__init__`. Use `processing_class` instead.
+  super().__init__(*args, **kwargs)
+Using auto half precision backend
+The following columns in the Training set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+***** Running training *****
+  Num examples = 168
+  Num Epochs = 6
+  Instantaneous batch size per device = 16
+  Total train batch size (w. parallel, distributed & accumulation) = 64
+  Gradient Accumulation steps = 4
+  Total optimization steps = 18
+  Number of trainable parameters = 117,311,235
+Starting training for fold 3...
+Safetensors PR exists
+ [18/18 03:58, Epoch 6/6]
+Epoch	Training Loss	Validation Loss	Accuracy	F1	Precision	Recall
+1	1.997700	0.492201	0.476190	0.390476	0.354654	0.476190
+2	1.812100	0.455974	0.547619	0.459034	0.526190	0.547619
+3	1.622800	0.320407	0.523810	0.441327	0.390678	0.523810
+4	1.419200	0.229911	0.714286	0.664814	0.797258	0.714286
+5	1.158300	0.264450	0.642857	0.572562	0.667702	0.642857
+6	1.073300	0.209979	0.690476	0.626077	0.787546	0.690476
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Saving model checkpoint to ./xlnet_results/fold_3/checkpoint-3
+Configuration saved in ./xlnet_results/fold_3/checkpoint-3/config.json
+Model weights saved in ./xlnet_results/fold_3/checkpoint-3/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_3/checkpoint-3/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_3/checkpoint-3/special_tokens_map.json
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_3/checkpoint-6
+Configuration saved in ./xlnet_results/fold_3/checkpoint-6/config.json
+Model weights saved in ./xlnet_results/fold_3/checkpoint-6/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_3/checkpoint-6/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_3/checkpoint-6/special_tokens_map.json
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Saving model checkpoint to ./xlnet_results/fold_3/checkpoint-9
+Configuration saved in ./xlnet_results/fold_3/checkpoint-9/config.json
+Model weights saved in ./xlnet_results/fold_3/checkpoint-9/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_3/checkpoint-9/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_3/checkpoint-9/special_tokens_map.json
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_3/checkpoint-12
+Configuration saved in ./xlnet_results/fold_3/checkpoint-12/config.json
+Model weights saved in ./xlnet_results/fold_3/checkpoint-12/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_3/checkpoint-12/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_3/checkpoint-12/special_tokens_map.json
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_3/checkpoint-15
+Configuration saved in ./xlnet_results/fold_3/checkpoint-15/config.json
+Model weights saved in ./xlnet_results/fold_3/checkpoint-15/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_3/checkpoint-15/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_3/checkpoint-15/special_tokens_map.json
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_3/checkpoint-18
+Configuration saved in ./xlnet_results/fold_3/checkpoint-18/config.json
+Model weights saved in ./xlnet_results/fold_3/checkpoint-18/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_3/checkpoint-18/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_3/checkpoint-18/special_tokens_map.json
+
+
+Training completed. Do not forget to share your model on huggingface.co/models =)
+
+
+Loading best model from ./xlnet_results/fold_3/checkpoint-12 (score: 0.6648142094366352).
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+Evaluating fold 3 on its validation set...
+ [2/2 00:00]
+Fold 3 - Validation F1: 0.6648, Accuracy: 0.7143
+\n--- Fold 4/5 ---
+Map: 100%
+ 168/168 [00:00<00:00, 360.20 examples/s]
+Map: 100%
+ 42/42 [00:00<00:00, 297.93 examples/s]
+loading configuration file config.json from cache at /root/.cache/huggingface/hub/models--xlnet-base-cased/snapshots/ceaa69c7bc5e512b5007106a7ccbb7daf24b2c79/config.json
+Model config XLNetConfig {
+  "architectures": [
+    "XLNetLMHeadModel"
+  ],
+  "attn_type": "bi",
+  "bi_data": false,
+  "bos_token_id": 1,
+  "clamp_len": -1,
+  "d_head": 64,
+  "d_inner": 3072,
+  "d_model": 768,
+  "dropout": 0.1,
+  "end_n_top": 5,
+  "eos_token_id": 2,
+  "ff_activation": "gelu",
+  "id2label": {
+    "0": "LABEL_0",
+    "1": "LABEL_1",
+    "2": "LABEL_2"
+  },
+  "initializer_range": 0.02,
+  "label2id": {
+    "LABEL_0": 0,
+    "LABEL_1": 1,
+    "LABEL_2": 2
+  },
+  "layer_norm_eps": 1e-12,
+  "mem_len": null,
+  "model_type": "xlnet",
+  "n_head": 12,
+  "n_layer": 12,
+  "pad_token_id": 5,
+  "reuse_len": null,
+  "same_length": false,
+  "start_n_top": 5,
+  "summary_activation": "tanh",
+  "summary_last_dropout": 0.1,
+  "summary_type": "last",
+  "summary_use_proj": true,
+  "task_specific_params": {
+    "text-generation": {
+      "do_sample": true,
+      "max_length": 250
+    }
+  },
+  "transformers_version": "4.52.2",
+  "untie_r": true,
+  "use_mems_eval": true,
+  "use_mems_train": false,
+  "vocab_size": 32000
+}
+
+loading weights file pytorch_model.bin from cache at /root/.cache/huggingface/hub/models--xlnet-base-cased/snapshots/ceaa69c7bc5e512b5007106a7ccbb7daf24b2c79/pytorch_model.bin
+Attempting to create safetensors variant
+Some weights of the model checkpoint at xlnet-base-cased were not used when initializing XLNetForSequenceClassification: ['lm_loss.bias', 'lm_loss.weight']
+- This IS expected if you are initializing XLNetForSequenceClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing XLNetForSequenceClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+Some weights of XLNetForSequenceClassification were not initialized from the model checkpoint at xlnet-base-cased and are newly initialized: ['logits_proj.bias', 'logits_proj.weight', 'sequence_summary.summary.bias', 'sequence_summary.summary.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+PyTorch: setting up devices
+<ipython-input-1-e41307206d80>:81: FutureWarning: `tokenizer` is deprecated and will be removed in version 5.0.0 for `CustomTrainer.__init__`. Use `processing_class` instead.
+  super().__init__(*args, **kwargs)
+Using auto half precision backend
+Starting training for fold 4...
+The following columns in the Training set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+***** Running training *****
+  Num examples = 168
+  Num Epochs = 6
+  Instantaneous batch size per device = 16
+  Total train batch size (w. parallel, distributed & accumulation) = 64
+  Gradient Accumulation steps = 4
+  Total optimization steps = 18
+  Number of trainable parameters = 117,311,235
+Safetensors PR exists
+ [18/18 04:24, Epoch 6/6]
+Epoch	Training Loss	Validation Loss	Accuracy	F1	Precision	Recall
+1	1.864700	0.536209	0.357143	0.279365	0.251082	0.357143
+2	1.823400	0.458868	0.476190	0.370738	0.499839	0.476190
+3	1.670300	0.424404	0.452381	0.301587	0.226190	0.452381
+4	1.621300	0.421898	0.428571	0.365429	0.485390	0.428571
+5	1.378000	0.274164	0.619048	0.532981	0.615801	0.619048
+6	1.201800	0.307119	0.571429	0.458450	0.388476	0.571429
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_4/checkpoint-3
+Configuration saved in ./xlnet_results/fold_4/checkpoint-3/config.json
+Model weights saved in ./xlnet_results/fold_4/checkpoint-3/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_4/checkpoint-3/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_4/checkpoint-3/special_tokens_map.json
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_4/checkpoint-6
+Configuration saved in ./xlnet_results/fold_4/checkpoint-6/config.json
+Model weights saved in ./xlnet_results/fold_4/checkpoint-6/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_4/checkpoint-6/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_4/checkpoint-6/special_tokens_map.json
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Saving model checkpoint to ./xlnet_results/fold_4/checkpoint-9
+Configuration saved in ./xlnet_results/fold_4/checkpoint-9/config.json
+Model weights saved in ./xlnet_results/fold_4/checkpoint-9/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_4/checkpoint-9/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_4/checkpoint-9/special_tokens_map.json
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_4/checkpoint-12
+Configuration saved in ./xlnet_results/fold_4/checkpoint-12/config.json
+Model weights saved in ./xlnet_results/fold_4/checkpoint-12/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_4/checkpoint-12/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_4/checkpoint-12/special_tokens_map.json
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_4/checkpoint-15
+Configuration saved in ./xlnet_results/fold_4/checkpoint-15/config.json
+Model weights saved in ./xlnet_results/fold_4/checkpoint-15/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_4/checkpoint-15/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_4/checkpoint-15/special_tokens_map.json
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_4/checkpoint-18
+Configuration saved in ./xlnet_results/fold_4/checkpoint-18/config.json
+Model weights saved in ./xlnet_results/fold_4/checkpoint-18/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_4/checkpoint-18/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_4/checkpoint-18/special_tokens_map.json
+
+
+Training completed. Do not forget to share your model on huggingface.co/models =)
+
+
+Loading best model from ./xlnet_results/fold_4/checkpoint-15 (score: 0.5329813976872801).
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+Evaluating fold 4 on its validation set...
+ [2/2 00:00]
+Fold 4 - Validation F1: 0.5330, Accuracy: 0.6190
+\n--- Fold 5/5 ---
+Map: 100%
+ 168/168 [00:00<00:00, 337.97 examples/s]
+Map: 100%
+ 42/42 [00:00<00:00, 296.09 examples/s]
+loading configuration file config.json from cache at /root/.cache/huggingface/hub/models--xlnet-base-cased/snapshots/ceaa69c7bc5e512b5007106a7ccbb7daf24b2c79/config.json
+Model config XLNetConfig {
+  "architectures": [
+    "XLNetLMHeadModel"
+  ],
+  "attn_type": "bi",
+  "bi_data": false,
+  "bos_token_id": 1,
+  "clamp_len": -1,
+  "d_head": 64,
+  "d_inner": 3072,
+  "d_model": 768,
+  "dropout": 0.1,
+  "end_n_top": 5,
+  "eos_token_id": 2,
+  "ff_activation": "gelu",
+  "id2label": {
+    "0": "LABEL_0",
+    "1": "LABEL_1",
+    "2": "LABEL_2"
+  },
+  "initializer_range": 0.02,
+  "label2id": {
+    "LABEL_0": 0,
+    "LABEL_1": 1,
+    "LABEL_2": 2
+  },
+  "layer_norm_eps": 1e-12,
+  "mem_len": null,
+  "model_type": "xlnet",
+  "n_head": 12,
+  "n_layer": 12,
+  "pad_token_id": 5,
+  "reuse_len": null,
+  "same_length": false,
+  "start_n_top": 5,
+  "summary_activation": "tanh",
+  "summary_last_dropout": 0.1,
+  "summary_type": "last",
+  "summary_use_proj": true,
+  "task_specific_params": {
+    "text-generation": {
+      "do_sample": true,
+      "max_length": 250
+    }
+  },
+  "transformers_version": "4.52.2",
+  "untie_r": true,
+  "use_mems_eval": true,
+  "use_mems_train": false,
+  "vocab_size": 32000
+}
+
+loading weights file pytorch_model.bin from cache at /root/.cache/huggingface/hub/models--xlnet-base-cased/snapshots/ceaa69c7bc5e512b5007106a7ccbb7daf24b2c79/pytorch_model.bin
+Attempting to create safetensors variant
+Some weights of the model checkpoint at xlnet-base-cased were not used when initializing XLNetForSequenceClassification: ['lm_loss.bias', 'lm_loss.weight']
+- This IS expected if you are initializing XLNetForSequenceClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing XLNetForSequenceClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+Some weights of XLNetForSequenceClassification were not initialized from the model checkpoint at xlnet-base-cased and are newly initialized: ['logits_proj.bias', 'logits_proj.weight', 'sequence_summary.summary.bias', 'sequence_summary.summary.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+PyTorch: setting up devices
+<ipython-input-1-e41307206d80>:81: FutureWarning: `tokenizer` is deprecated and will be removed in version 5.0.0 for `CustomTrainer.__init__`. Use `processing_class` instead.
+  super().__init__(*args, **kwargs)
+Using auto half precision backend
+Starting training for fold 5...
+The following columns in the Training set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+***** Running training *****
+  Num examples = 168
+  Num Epochs = 6
+  Instantaneous batch size per device = 16
+  Total train batch size (w. parallel, distributed & accumulation) = 64
+  Gradient Accumulation steps = 4
+  Total optimization steps = 18
+  Number of trainable parameters = 117,311,235
+Safetensors PR exists
+ [18/18 03:48, Epoch 6/6]
+Epoch	Training Loss	Validation Loss	Accuracy	F1	Precision	Recall
+1	1.942900	0.519247	0.357143	0.281818	0.236975	0.357143
+2	1.770900	0.465745	0.380952	0.347884	0.466954	0.380952
+3	1.604400	0.407928	0.380952	0.361473	0.514063	0.380952
+4	1.307200	0.318722	0.619048	0.597032	0.620370	0.619048
+5	0.982200	0.279446	0.547619	0.514849	0.512302	0.547619
+6	0.811600	0.290726	0.571429	0.566727	0.587251	0.571429
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Saving model checkpoint to ./xlnet_results/fold_5/checkpoint-3
+Configuration saved in ./xlnet_results/fold_5/checkpoint-3/config.json
+Model weights saved in ./xlnet_results/fold_5/checkpoint-3/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_5/checkpoint-3/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_5/checkpoint-3/special_tokens_map.json
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_5/checkpoint-6
+Configuration saved in ./xlnet_results/fold_5/checkpoint-6/config.json
+Model weights saved in ./xlnet_results/fold_5/checkpoint-6/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_5/checkpoint-6/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_5/checkpoint-6/special_tokens_map.json
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_5/checkpoint-9
+Configuration saved in ./xlnet_results/fold_5/checkpoint-9/config.json
+Model weights saved in ./xlnet_results/fold_5/checkpoint-9/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_5/checkpoint-9/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_5/checkpoint-9/special_tokens_map.json
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_5/checkpoint-12
+Configuration saved in ./xlnet_results/fold_5/checkpoint-12/config.json
+Model weights saved in ./xlnet_results/fold_5/checkpoint-12/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_5/checkpoint-12/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_5/checkpoint-12/special_tokens_map.json
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_5/checkpoint-15
+Configuration saved in ./xlnet_results/fold_5/checkpoint-15/config.json
+Model weights saved in ./xlnet_results/fold_5/checkpoint-15/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_5/checkpoint-15/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_5/checkpoint-15/special_tokens_map.json
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_5/checkpoint-18
+Configuration saved in ./xlnet_results/fold_5/checkpoint-18/config.json
+Model weights saved in ./xlnet_results/fold_5/checkpoint-18/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_5/checkpoint-18/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_5/checkpoint-18/special_tokens_map.json
+
+
+Training completed. Do not forget to share your model on huggingface.co/models =)
+
+
+Loading best model from ./xlnet_results/fold_5/checkpoint-12 (score: 0.597032436162871).
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 42
+  Batch size = 32
+Evaluating fold 5 on its validation set...
+ [2/2 00:00]
+loading configuration file config.json from cache at /root/.cache/huggingface/hub/models--xlnet-base-cased/snapshots/ceaa69c7bc5e512b5007106a7ccbb7daf24b2c79/config.json
+Model config XLNetConfig {
+  "architectures": [
+    "XLNetLMHeadModel"
+  ],
+  "attn_type": "bi",
+  "bi_data": false,
+  "bos_token_id": 1,
+  "clamp_len": -1,
+  "d_head": 64,
+  "d_inner": 3072,
+  "d_model": 768,
+  "dropout": 0.1,
+  "end_n_top": 5,
+  "eos_token_id": 2,
+  "ff_activation": "gelu",
+  "id2label": {
+    "0": "LABEL_0",
+    "1": "LABEL_1",
+    "2": "LABEL_2"
+  },
+  "initializer_range": 0.02,
+  "label2id": {
+    "LABEL_0": 0,
+    "LABEL_1": 1,
+    "LABEL_2": 2
+  },
+  "layer_norm_eps": 1e-12,
+  "mem_len": null,
+  "model_type": "xlnet",
+  "n_head": 12,
+  "n_layer": 12,
+  "pad_token_id": 5,
+  "reuse_len": null,
+  "same_length": false,
+  "start_n_top": 5,
+  "summary_activation": "tanh",
+  "summary_last_dropout": 0.1,
+  "summary_type": "last",
+  "summary_use_proj": true,
+  "task_specific_params": {
+    "text-generation": {
+      "do_sample": true,
+      "max_length": 250
+    }
+  },
+  "transformers_version": "4.52.2",
+  "untie_r": true,
+  "use_mems_eval": true,
+  "use_mems_train": false,
+  "vocab_size": 32000
+}
+
+Fold 5 - Validation F1: 0.5970, Accuracy: 0.6190
+\n--- Cross-Validation Summary (Average over folds) ---
+avg_eval_loss: 0.2731
+avg_eval_accuracy: 0.6857
+avg_eval_f1: 0.6384
+avg_eval_precision: 0.7249
+avg_eval_recall: 0.6857
+\nLoading the overall best model from cross-validation...
+loading weights file pytorch_model.bin from cache at /root/.cache/huggingface/hub/models--xlnet-base-cased/snapshots/ceaa69c7bc5e512b5007106a7ccbb7daf24b2c79/pytorch_model.bin
+Attempting to create safetensors variant
+Some weights of the model checkpoint at xlnet-base-cased were not used when initializing XLNetForSequenceClassification: ['lm_loss.bias', 'lm_loss.weight']
+- This IS expected if you are initializing XLNetForSequenceClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing XLNetForSequenceClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+Some weights of XLNetForSequenceClassification were not initialized from the model checkpoint at xlnet-base-cased and are newly initialized: ['logits_proj.bias', 'logits_proj.weight', 'sequence_summary.summary.bias', 'sequence_summary.summary.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Configuration saved in ./xlnet_classifier_cv/config.json
+Saving the best model to ./xlnet_classifier_cv...
+Safetensors PR exists
+Model weights saved in ./xlnet_classifier_cv/model.safetensors
+tokenizer config file saved in ./xlnet_classifier_cv/tokenizer_config.json
+Special tokens file saved in ./xlnet_classifier_cv/special_tokens_map.json
+Plotting training history of the best fold...
+Training history plot saved to xlnet_training_history_cv_best_fold.png
+\nEvaluating the best model on the hold-out test set...
+Map: 100%
+ 38/38 [00:00<00:00, 246.62 examples/s]
+PyTorch: setting up devices
+<ipython-input-1-e41307206d80>:477: FutureWarning: `tokenizer` is deprecated and will be removed in version 5.0.0 for `Trainer.__init__`. Use `processing_class` instead.
+  test_trainer = Trainer(
+Using auto half precision backend
+
+***** Running Prediction *****
+  Num examples = 38
+  Batch size = 32
+\nTest Set Evaluation Report:
+              precision    recall  f1-score   support
+
+AI-Generated     0.8571    0.7500    0.8000         8
+   Authentic     0.6190    0.7647    0.6842        17
+     Generic     0.5000    0.3846    0.4348        13
+
+    accuracy                         0.6316        38
+   macro avg     0.6587    0.6331    0.6397        38
+weighted avg     0.6284    0.6316    0.6233        38
+
+Plotting confusion matrix for the test set...
+Confusion matrix saved to xlnet_confusion_matrix_cv_test.png
+
+"""
+
+
+"""
+Starting XLNet model training with 5-fold cross-validation and Focal Loss
+Model: xlnet-base-cased, Max Length: 384, Batch Size (per device): 16
+Effective Batch Size: 32, Eval Batch Size: 32
+Learning Rate: 5e-05, Epochs per fold: 6
+Loading data...
+Successfully loaded data with cp1252 encoding.
+Loaded 399 samples with 3 classes: ['AI-Generated' 'Authentic' 'Generic']
+Train/CV set size: 339, Test set size: 60
 loading file spiece.model from cache at /root/.cache/huggingface/hub/models--xlnet-base-cased/snapshots/ceaa69c7bc5e512b5007106a7ccbb7daf24b2c79/spiece.model
 loading file added_tokens.json from cache at None
 loading file special_tokens_map.json from cache at None
@@ -604,9 +1608,9 @@ Model config XLNetConfig {
 
 \n--- Fold 1/5 ---
 Map: 100%
- 235/235 [00:00<00:00, 323.25 examples/s]
+ 271/271 [00:01<00:00, 186.59 examples/s]
 Map: 100%
- 59/59 [00:00<00:00, 312.27 examples/s]
+ 68/68 [00:00<00:00, 174.42 examples/s]
 loading configuration file config.json from cache at /root/.cache/huggingface/hub/models--xlnet-base-cased/snapshots/ceaa69c7bc5e512b5007106a7ccbb7daf24b2c79/config.json
 Model config XLNetConfig {
   "architectures": [
@@ -668,185 +1672,112 @@ Some weights of the model checkpoint at xlnet-base-cased were not used when init
 Some weights of XLNetForSequenceClassification were not initialized from the model checkpoint at xlnet-base-cased and are newly initialized: ['logits_proj.bias', 'logits_proj.weight', 'sequence_summary.summary.bias', 'sequence_summary.summary.weight']
 You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
 PyTorch: setting up devices
-<ipython-input-4-b79c724d525b>:81: FutureWarning: `tokenizer` is deprecated and will be removed in version 5.0.0 for `CustomTrainer.__init__`. Use `processing_class` instead.
+<ipython-input-2-b03fa68760c4>:81: FutureWarning: `tokenizer` is deprecated and will be removed in version 5.0.0 for `CustomTrainer.__init__`. Use `processing_class` instead.
   super().__init__(*args, **kwargs)
 Using auto half precision backend
-Starting training for fold 1...
 The following columns in the Training set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 ***** Running training *****
-  Num examples = 235
-  Num Epochs = 15
-  Instantaneous batch size per device = 8
+  Num examples = 271
+  Num Epochs = 6
+  Instantaneous batch size per device = 16
   Total train batch size (w. parallel, distributed & accumulation) = 32
-  Gradient Accumulation steps = 4
-  Total optimization steps = 120
+  Gradient Accumulation steps = 2
+  Total optimization steps = 54
   Number of trainable parameters = 117,311,235
+Starting training for fold 1...
 Safetensors PR exists
- [104/120 10:47 < 01:41, 0.16 it/s, Epoch 13/15]
+ [54/54 06:22, Epoch 6/6]
 Epoch	Training Loss	Validation Loss	Accuracy	F1	Precision	Recall
-1	1.828500	0.399816	0.576271	0.474576	0.436158	0.576271
-2	1.560000	0.334967	0.508475	0.478773	0.472864	0.508475
-3	1.222100	0.276452	0.644068	0.611573	0.661608	0.644068
-4	0.945000	0.210736	0.762712	0.748625	0.779200	0.762712
-5	0.901500	0.242239	0.694915	0.697543	0.733757	0.694915
-6	0.762900	0.201991	0.711864	0.672693	0.765537	0.711864
-7	0.663300	0.185067	0.745763	0.751584	0.773403	0.745763
-8	0.602000	0.206034	0.745763	0.735583	0.763038	0.745763
-9	0.573200	0.190735	0.677966	0.681004	0.688559	0.677966
-10	0.474600	0.147059	0.762712	0.755719	0.778494	0.762712
-11	0.433900	0.149856	0.745763	0.744703	0.751745	0.745763
-12	0.370500	0.160296	0.728814	0.725813	0.733959	0.728814
-13	0.329000	0.164009	0.728814	0.729548	0.736090	0.728814
+1	0.898800	0.410657	0.426471	0.376614	0.338965	0.426471
+2	0.700900	0.433762	0.647059	0.535006	0.472465	0.647059
+3	0.555700	0.306249	0.661765	0.567351	0.760861	0.661765
+4	0.400100	0.271019	0.676471	0.651852	0.671462	0.676471
+5	0.272300	0.286453	0.691176	0.695482	0.704657	0.691176
+6	0.197300	0.303150	0.676471	0.651852	0.671462	0.676471
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_1/checkpoint-8
-Configuration saved in ./xlnet_results/fold_1/checkpoint-8/config.json
-Model weights saved in ./xlnet_results/fold_1/checkpoint-8/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_1/checkpoint-8/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_1/checkpoint-8/special_tokens_map.json
+  Num examples = 68
+  Batch size = 32
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Saving model checkpoint to ./xlnet_results/fold_1/checkpoint-9
+Configuration saved in ./xlnet_results/fold_1/checkpoint-9/config.json
+Model weights saved in ./xlnet_results/fold_1/checkpoint-9/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_1/checkpoint-9/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_1/checkpoint-9/special_tokens_map.json
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_1/checkpoint-16
-Configuration saved in ./xlnet_results/fold_1/checkpoint-16/config.json
-Model weights saved in ./xlnet_results/fold_1/checkpoint-16/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_1/checkpoint-16/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_1/checkpoint-16/special_tokens_map.json
+  Num examples = 68
+  Batch size = 32
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Saving model checkpoint to ./xlnet_results/fold_1/checkpoint-18
+Configuration saved in ./xlnet_results/fold_1/checkpoint-18/config.json
+Model weights saved in ./xlnet_results/fold_1/checkpoint-18/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_1/checkpoint-18/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_1/checkpoint-18/special_tokens_map.json
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_1/checkpoint-24
-Configuration saved in ./xlnet_results/fold_1/checkpoint-24/config.json
-Model weights saved in ./xlnet_results/fold_1/checkpoint-24/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_1/checkpoint-24/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_1/checkpoint-24/special_tokens_map.json
+  Num examples = 68
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_1/checkpoint-27
+Configuration saved in ./xlnet_results/fold_1/checkpoint-27/config.json
+Model weights saved in ./xlnet_results/fold_1/checkpoint-27/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_1/checkpoint-27/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_1/checkpoint-27/special_tokens_map.json
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_1/checkpoint-32
-Configuration saved in ./xlnet_results/fold_1/checkpoint-32/config.json
-Model weights saved in ./xlnet_results/fold_1/checkpoint-32/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_1/checkpoint-32/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_1/checkpoint-32/special_tokens_map.json
+  Num examples = 68
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_1/checkpoint-36
+Configuration saved in ./xlnet_results/fold_1/checkpoint-36/config.json
+Model weights saved in ./xlnet_results/fold_1/checkpoint-36/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_1/checkpoint-36/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_1/checkpoint-36/special_tokens_map.json
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_1/checkpoint-40
-Configuration saved in ./xlnet_results/fold_1/checkpoint-40/config.json
-Model weights saved in ./xlnet_results/fold_1/checkpoint-40/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_1/checkpoint-40/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_1/checkpoint-40/special_tokens_map.json
+  Num examples = 68
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_1/checkpoint-45
+Configuration saved in ./xlnet_results/fold_1/checkpoint-45/config.json
+Model weights saved in ./xlnet_results/fold_1/checkpoint-45/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_1/checkpoint-45/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_1/checkpoint-45/special_tokens_map.json
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_1/checkpoint-48
-Configuration saved in ./xlnet_results/fold_1/checkpoint-48/config.json
-Model weights saved in ./xlnet_results/fold_1/checkpoint-48/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_1/checkpoint-48/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_1/checkpoint-48/special_tokens_map.json
-The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
-
-***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_1/checkpoint-56
-Configuration saved in ./xlnet_results/fold_1/checkpoint-56/config.json
-Model weights saved in ./xlnet_results/fold_1/checkpoint-56/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_1/checkpoint-56/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_1/checkpoint-56/special_tokens_map.json
-The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
-
-***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_1/checkpoint-64
-Configuration saved in ./xlnet_results/fold_1/checkpoint-64/config.json
-Model weights saved in ./xlnet_results/fold_1/checkpoint-64/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_1/checkpoint-64/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_1/checkpoint-64/special_tokens_map.json
-The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
-
-***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_1/checkpoint-72
-Configuration saved in ./xlnet_results/fold_1/checkpoint-72/config.json
-Model weights saved in ./xlnet_results/fold_1/checkpoint-72/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_1/checkpoint-72/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_1/checkpoint-72/special_tokens_map.json
-The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
-
-***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_1/checkpoint-80
-Configuration saved in ./xlnet_results/fold_1/checkpoint-80/config.json
-Model weights saved in ./xlnet_results/fold_1/checkpoint-80/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_1/checkpoint-80/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_1/checkpoint-80/special_tokens_map.json
-The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
-
-***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_1/checkpoint-88
-Configuration saved in ./xlnet_results/fold_1/checkpoint-88/config.json
-Model weights saved in ./xlnet_results/fold_1/checkpoint-88/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_1/checkpoint-88/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_1/checkpoint-88/special_tokens_map.json
-The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
-
-***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_1/checkpoint-96
-Configuration saved in ./xlnet_results/fold_1/checkpoint-96/config.json
-Model weights saved in ./xlnet_results/fold_1/checkpoint-96/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_1/checkpoint-96/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_1/checkpoint-96/special_tokens_map.json
-The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
-
-***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_1/checkpoint-104
-Configuration saved in ./xlnet_results/fold_1/checkpoint-104/config.json
-Model weights saved in ./xlnet_results/fold_1/checkpoint-104/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_1/checkpoint-104/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_1/checkpoint-104/special_tokens_map.json
+  Num examples = 68
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_1/checkpoint-54
+Configuration saved in ./xlnet_results/fold_1/checkpoint-54/config.json
+Model weights saved in ./xlnet_results/fold_1/checkpoint-54/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_1/checkpoint-54/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_1/checkpoint-54/special_tokens_map.json
 
 
 Training completed. Do not forget to share your model on huggingface.co/models =)
 
 
-Loading best model from ./xlnet_results/fold_1/checkpoint-80 (score: 0.755718954248366).
+Loading best model from ./xlnet_results/fold_1/checkpoint-45 (score: 0.6954824806449038).
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
+  Num examples = 68
+  Batch size = 32
 Evaluating fold 1 on its validation set...
- [4/4 00:03]
-Fold 1 - Validation F1: 0.7557, Accuracy: 0.7627
-New best model found in fold 1 with F1: 0.7557
+ [3/3 00:01]
+Fold 1 - Validation F1: 0.6955, Accuracy: 0.6912
+New best model found in fold 1 with F1: 0.6955
 \n--- Fold 2/5 ---
 Map: 100%
- 235/235 [00:00<00:00, 314.27 examples/s]
+ 271/271 [00:00<00:00, 307.95 examples/s]
 Map: 100%
- 59/59 [00:00<00:00, 286.43 examples/s]
+ 68/68 [00:00<00:00, 310.18 examples/s]
 loading configuration file config.json from cache at /root/.cache/huggingface/hub/models--xlnet-base-cased/snapshots/ceaa69c7bc5e512b5007106a7ccbb7daf24b2c79/config.json
 Model config XLNetConfig {
   "architectures": [
@@ -908,129 +1839,111 @@ Some weights of the model checkpoint at xlnet-base-cased were not used when init
 Some weights of XLNetForSequenceClassification were not initialized from the model checkpoint at xlnet-base-cased and are newly initialized: ['logits_proj.bias', 'logits_proj.weight', 'sequence_summary.summary.bias', 'sequence_summary.summary.weight']
 You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
 PyTorch: setting up devices
-<ipython-input-4-b79c724d525b>:81: FutureWarning: `tokenizer` is deprecated and will be removed in version 5.0.0 for `CustomTrainer.__init__`. Use `processing_class` instead.
+<ipython-input-2-b03fa68760c4>:81: FutureWarning: `tokenizer` is deprecated and will be removed in version 5.0.0 for `CustomTrainer.__init__`. Use `processing_class` instead.
   super().__init__(*args, **kwargs)
 Using auto half precision backend
+Starting training for fold 2...
 The following columns in the Training set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 ***** Running training *****
-  Num examples = 235
-  Num Epochs = 15
-  Instantaneous batch size per device = 8
+  Num examples = 271
+  Num Epochs = 6
+  Instantaneous batch size per device = 16
   Total train batch size (w. parallel, distributed & accumulation) = 32
-  Gradient Accumulation steps = 4
-  Total optimization steps = 120
+  Gradient Accumulation steps = 2
+  Total optimization steps = 54
   Number of trainable parameters = 117,311,235
 Safetensors PR exists
-Starting training for fold 2...
- [ 64/120 06:49 < 06:09, 0.15 it/s, Epoch 8/15]
+ [54/54 06:49, Epoch 6/6]
 Epoch	Training Loss	Validation Loss	Accuracy	F1	Precision	Recall
-1	2.053000	0.473726	0.372881	0.320119	0.348356	0.372881
-2	1.539900	0.285416	0.576271	0.497821	0.438257	0.576271
-3	1.134200	0.223000	0.677966	0.665369	0.663612	0.677966
-4	0.845200	0.233825	0.661017	0.615015	0.640766	0.661017
-5	0.752000	0.190141	0.711864	0.714270	0.728371	0.711864
-6	0.577300	0.205325	0.711864	0.653988	0.742938	0.711864
-7	0.469400	0.191072	0.694915	0.696483	0.708218	0.694915
-8	0.343400	0.183887	0.728814	0.713678	0.728489	0.728814
+1	0.909000	0.459542	0.514706	0.349800	0.264922	0.514706
+2	0.873600	0.403484	0.544118	0.409948	0.552362	0.544118
+3	0.816900	0.425536	0.529412	0.455437	0.596069	0.529412
+4	0.751000	0.397527	0.558824	0.475118	0.624036	0.558824
+5	0.589600	0.379080	0.602941	0.610351	0.624231	0.602941
+6	0.464700	0.378947	0.617647	0.611291	0.611520	0.617647
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_2/checkpoint-8
-Configuration saved in ./xlnet_results/fold_2/checkpoint-8/config.json
-Model weights saved in ./xlnet_results/fold_2/checkpoint-8/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_2/checkpoint-8/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_2/checkpoint-8/special_tokens_map.json
+  Num examples = 68
+  Batch size = 32
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Saving model checkpoint to ./xlnet_results/fold_2/checkpoint-9
+Configuration saved in ./xlnet_results/fold_2/checkpoint-9/config.json
+Model weights saved in ./xlnet_results/fold_2/checkpoint-9/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_2/checkpoint-9/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_2/checkpoint-9/special_tokens_map.json
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_2/checkpoint-16
-Configuration saved in ./xlnet_results/fold_2/checkpoint-16/config.json
-Model weights saved in ./xlnet_results/fold_2/checkpoint-16/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_2/checkpoint-16/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_2/checkpoint-16/special_tokens_map.json
+  Num examples = 68
+  Batch size = 32
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Saving model checkpoint to ./xlnet_results/fold_2/checkpoint-18
+Configuration saved in ./xlnet_results/fold_2/checkpoint-18/config.json
+Model weights saved in ./xlnet_results/fold_2/checkpoint-18/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_2/checkpoint-18/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_2/checkpoint-18/special_tokens_map.json
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_2/checkpoint-24
-Configuration saved in ./xlnet_results/fold_2/checkpoint-24/config.json
-Model weights saved in ./xlnet_results/fold_2/checkpoint-24/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_2/checkpoint-24/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_2/checkpoint-24/special_tokens_map.json
+  Num examples = 68
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_2/checkpoint-27
+Configuration saved in ./xlnet_results/fold_2/checkpoint-27/config.json
+Model weights saved in ./xlnet_results/fold_2/checkpoint-27/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_2/checkpoint-27/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_2/checkpoint-27/special_tokens_map.json
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_2/checkpoint-32
-Configuration saved in ./xlnet_results/fold_2/checkpoint-32/config.json
-Model weights saved in ./xlnet_results/fold_2/checkpoint-32/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_2/checkpoint-32/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_2/checkpoint-32/special_tokens_map.json
+  Num examples = 68
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_2/checkpoint-36
+Configuration saved in ./xlnet_results/fold_2/checkpoint-36/config.json
+Model weights saved in ./xlnet_results/fold_2/checkpoint-36/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_2/checkpoint-36/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_2/checkpoint-36/special_tokens_map.json
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_2/checkpoint-40
-Configuration saved in ./xlnet_results/fold_2/checkpoint-40/config.json
-Model weights saved in ./xlnet_results/fold_2/checkpoint-40/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_2/checkpoint-40/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_2/checkpoint-40/special_tokens_map.json
+  Num examples = 68
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_2/checkpoint-45
+Configuration saved in ./xlnet_results/fold_2/checkpoint-45/config.json
+Model weights saved in ./xlnet_results/fold_2/checkpoint-45/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_2/checkpoint-45/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_2/checkpoint-45/special_tokens_map.json
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_2/checkpoint-48
-Configuration saved in ./xlnet_results/fold_2/checkpoint-48/config.json
-Model weights saved in ./xlnet_results/fold_2/checkpoint-48/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_2/checkpoint-48/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_2/checkpoint-48/special_tokens_map.json
-The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
-
-***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_2/checkpoint-56
-Configuration saved in ./xlnet_results/fold_2/checkpoint-56/config.json
-Model weights saved in ./xlnet_results/fold_2/checkpoint-56/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_2/checkpoint-56/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_2/checkpoint-56/special_tokens_map.json
-The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
-
-***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_2/checkpoint-64
-Configuration saved in ./xlnet_results/fold_2/checkpoint-64/config.json
-Model weights saved in ./xlnet_results/fold_2/checkpoint-64/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_2/checkpoint-64/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_2/checkpoint-64/special_tokens_map.json
+  Num examples = 68
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_2/checkpoint-54
+Configuration saved in ./xlnet_results/fold_2/checkpoint-54/config.json
+Model weights saved in ./xlnet_results/fold_2/checkpoint-54/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_2/checkpoint-54/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_2/checkpoint-54/special_tokens_map.json
 
 
 Training completed. Do not forget to share your model on huggingface.co/models =)
 
 
-Loading best model from ./xlnet_results/fold_2/checkpoint-40 (score: 0.7142696080273592).
+Loading best model from ./xlnet_results/fold_2/checkpoint-54 (score: 0.6112906701141995).
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
+  Num examples = 68
+  Batch size = 32
 Evaluating fold 2 on its validation set...
- [4/4 00:03]
-Fold 2 - Validation F1: 0.7143, Accuracy: 0.7119
+ [3/3 00:01]
+Fold 2 - Validation F1: 0.6113, Accuracy: 0.6176
 \n--- Fold 3/5 ---
 Map: 100%
- 235/235 [00:00<00:00, 314.02 examples/s]
+ 271/271 [00:00<00:00, 304.98 examples/s]
 Map: 100%
- 59/59 [00:00<00:00, 282.31 examples/s]
+ 68/68 [00:00<00:00, 296.17 examples/s]
 loading configuration file config.json from cache at /root/.cache/huggingface/hub/models--xlnet-base-cased/snapshots/ceaa69c7bc5e512b5007106a7ccbb7daf24b2c79/config.json
 Model config XLNetConfig {
   "architectures": [
@@ -1092,141 +2005,111 @@ Some weights of the model checkpoint at xlnet-base-cased were not used when init
 Some weights of XLNetForSequenceClassification were not initialized from the model checkpoint at xlnet-base-cased and are newly initialized: ['logits_proj.bias', 'logits_proj.weight', 'sequence_summary.summary.bias', 'sequence_summary.summary.weight']
 You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
 PyTorch: setting up devices
-<ipython-input-4-b79c724d525b>:81: FutureWarning: `tokenizer` is deprecated and will be removed in version 5.0.0 for `CustomTrainer.__init__`. Use `processing_class` instead.
+<ipython-input-2-b03fa68760c4>:81: FutureWarning: `tokenizer` is deprecated and will be removed in version 5.0.0 for `CustomTrainer.__init__`. Use `processing_class` instead.
   super().__init__(*args, **kwargs)
 Using auto half precision backend
-Starting training for fold 3...
 The following columns in the Training set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 ***** Running training *****
-  Num examples = 235
-  Num Epochs = 15
-  Instantaneous batch size per device = 8
+  Num examples = 271
+  Num Epochs = 6
+  Instantaneous batch size per device = 16
   Total train batch size (w. parallel, distributed & accumulation) = 32
-  Gradient Accumulation steps = 4
-  Total optimization steps = 120
+  Gradient Accumulation steps = 2
+  Total optimization steps = 54
   Number of trainable parameters = 117,311,235
+Starting training for fold 3...
 Safetensors PR exists
- [ 72/120 08:01 < 05:30, 0.15 it/s, Epoch 9/15]
+ [54/54 06:17, Epoch 6/6]
 Epoch	Training Loss	Validation Loss	Accuracy	F1	Precision	Recall
-1	2.423800	0.539708	0.322034	0.329787	0.417551	0.322034
-2	1.604900	0.322947	0.610169	0.590034	0.590961	0.610169
-3	1.076300	0.279456	0.745763	0.745174	0.748716	0.745763
-4	0.822700	0.248765	0.762712	0.750409	0.778852	0.762712
-5	0.634100	0.208343	0.762712	0.758692	0.766102	0.762712
-6	0.501300	0.224892	0.779661	0.779803	0.780956	0.779661
-7	0.401700	0.251382	0.745763	0.748863	0.754049	0.745763
-8	0.294800	0.243357	0.745763	0.741600	0.744364	0.745763
-9	0.227100	0.370441	0.627119	0.632318	0.703248	0.627119
+1	0.939500	0.423745	0.411765	0.373239	0.346609	0.411765
+2	0.689500	0.404963	0.573529	0.462256	0.416916	0.573529
+3	0.578900	0.375732	0.647059	0.632897	0.697041	0.647059
+4	0.530600	0.360699	0.588235	0.499224	0.603190	0.588235
+5	0.439100	0.393389	0.485294	0.464095	0.686029	0.485294
+6	0.382800	0.322979	0.632353	0.626763	0.648734	0.632353
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_3/checkpoint-8
-Configuration saved in ./xlnet_results/fold_3/checkpoint-8/config.json
-Model weights saved in ./xlnet_results/fold_3/checkpoint-8/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_3/checkpoint-8/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_3/checkpoint-8/special_tokens_map.json
+  Num examples = 68
+  Batch size = 32
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Saving model checkpoint to ./xlnet_results/fold_3/checkpoint-9
+Configuration saved in ./xlnet_results/fold_3/checkpoint-9/config.json
+Model weights saved in ./xlnet_results/fold_3/checkpoint-9/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_3/checkpoint-9/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_3/checkpoint-9/special_tokens_map.json
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_3/checkpoint-16
-Configuration saved in ./xlnet_results/fold_3/checkpoint-16/config.json
-Model weights saved in ./xlnet_results/fold_3/checkpoint-16/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_3/checkpoint-16/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_3/checkpoint-16/special_tokens_map.json
+  Num examples = 68
+  Batch size = 32
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Saving model checkpoint to ./xlnet_results/fold_3/checkpoint-18
+Configuration saved in ./xlnet_results/fold_3/checkpoint-18/config.json
+Model weights saved in ./xlnet_results/fold_3/checkpoint-18/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_3/checkpoint-18/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_3/checkpoint-18/special_tokens_map.json
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_3/checkpoint-24
-Configuration saved in ./xlnet_results/fold_3/checkpoint-24/config.json
-Model weights saved in ./xlnet_results/fold_3/checkpoint-24/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_3/checkpoint-24/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_3/checkpoint-24/special_tokens_map.json
+  Num examples = 68
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_3/checkpoint-27
+Configuration saved in ./xlnet_results/fold_3/checkpoint-27/config.json
+Model weights saved in ./xlnet_results/fold_3/checkpoint-27/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_3/checkpoint-27/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_3/checkpoint-27/special_tokens_map.json
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_3/checkpoint-32
-Configuration saved in ./xlnet_results/fold_3/checkpoint-32/config.json
-Model weights saved in ./xlnet_results/fold_3/checkpoint-32/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_3/checkpoint-32/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_3/checkpoint-32/special_tokens_map.json
+  Num examples = 68
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_3/checkpoint-36
+Configuration saved in ./xlnet_results/fold_3/checkpoint-36/config.json
+Model weights saved in ./xlnet_results/fold_3/checkpoint-36/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_3/checkpoint-36/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_3/checkpoint-36/special_tokens_map.json
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_3/checkpoint-40
-Configuration saved in ./xlnet_results/fold_3/checkpoint-40/config.json
-Model weights saved in ./xlnet_results/fold_3/checkpoint-40/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_3/checkpoint-40/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_3/checkpoint-40/special_tokens_map.json
+  Num examples = 68
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_3/checkpoint-45
+Configuration saved in ./xlnet_results/fold_3/checkpoint-45/config.json
+Model weights saved in ./xlnet_results/fold_3/checkpoint-45/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_3/checkpoint-45/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_3/checkpoint-45/special_tokens_map.json
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_3/checkpoint-48
-Configuration saved in ./xlnet_results/fold_3/checkpoint-48/config.json
-Model weights saved in ./xlnet_results/fold_3/checkpoint-48/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_3/checkpoint-48/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_3/checkpoint-48/special_tokens_map.json
-The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
-
-***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_3/checkpoint-56
-Configuration saved in ./xlnet_results/fold_3/checkpoint-56/config.json
-Model weights saved in ./xlnet_results/fold_3/checkpoint-56/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_3/checkpoint-56/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_3/checkpoint-56/special_tokens_map.json
-The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
-
-***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_3/checkpoint-64
-Configuration saved in ./xlnet_results/fold_3/checkpoint-64/config.json
-Model weights saved in ./xlnet_results/fold_3/checkpoint-64/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_3/checkpoint-64/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_3/checkpoint-64/special_tokens_map.json
-The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
-
-***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_3/checkpoint-72
-Configuration saved in ./xlnet_results/fold_3/checkpoint-72/config.json
-Model weights saved in ./xlnet_results/fold_3/checkpoint-72/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_3/checkpoint-72/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_3/checkpoint-72/special_tokens_map.json
+  Num examples = 68
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_3/checkpoint-54
+Configuration saved in ./xlnet_results/fold_3/checkpoint-54/config.json
+Model weights saved in ./xlnet_results/fold_3/checkpoint-54/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_3/checkpoint-54/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_3/checkpoint-54/special_tokens_map.json
 
 
 Training completed. Do not forget to share your model on huggingface.co/models =)
 
 
-Loading best model from ./xlnet_results/fold_3/checkpoint-48 (score: 0.779802613879331).
+Loading best model from ./xlnet_results/fold_3/checkpoint-27 (score: 0.6328972909106253).
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
+  Num examples = 68
+  Batch size = 32
 Evaluating fold 3 on its validation set...
- [4/4 00:03]
-Fold 3 - Validation F1: 0.7798, Accuracy: 0.7797
-New best model found in fold 3 with F1: 0.7798
+ [3/3 00:01]
+Fold 3 - Validation F1: 0.6329, Accuracy: 0.6471
 \n--- Fold 4/5 ---
 Map: 100%
- 235/235 [00:00<00:00, 299.82 examples/s]
+ 271/271 [00:00<00:00, 311.41 examples/s]
 Map: 100%
- 59/59 [00:00<00:00, 168.24 examples/s]
+ 68/68 [00:00<00:00, 294.08 examples/s]
 loading configuration file config.json from cache at /root/.cache/huggingface/hub/models--xlnet-base-cased/snapshots/ceaa69c7bc5e512b5007106a7ccbb7daf24b2c79/config.json
 Model config XLNetConfig {
   "architectures": [
@@ -1288,120 +2171,113 @@ Some weights of the model checkpoint at xlnet-base-cased were not used when init
 Some weights of XLNetForSequenceClassification were not initialized from the model checkpoint at xlnet-base-cased and are newly initialized: ['logits_proj.bias', 'logits_proj.weight', 'sequence_summary.summary.bias', 'sequence_summary.summary.weight']
 You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
 PyTorch: setting up devices
-<ipython-input-4-b79c724d525b>:81: FutureWarning: `tokenizer` is deprecated and will be removed in version 5.0.0 for `CustomTrainer.__init__`. Use `processing_class` instead.
+<ipython-input-2-b03fa68760c4>:81: FutureWarning: `tokenizer` is deprecated and will be removed in version 5.0.0 for `CustomTrainer.__init__`. Use `processing_class` instead.
   super().__init__(*args, **kwargs)
-Safetensors PR exists
 Using auto half precision backend
 Starting training for fold 4...
 The following columns in the Training set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 ***** Running training *****
-  Num examples = 235
-  Num Epochs = 15
-  Instantaneous batch size per device = 8
+  Num examples = 271
+  Num Epochs = 6
+  Instantaneous batch size per device = 16
   Total train batch size (w. parallel, distributed & accumulation) = 32
-  Gradient Accumulation steps = 4
-  Total optimization steps = 120
+  Gradient Accumulation steps = 2
+  Total optimization steps = 54
   Number of trainable parameters = 117,311,235
- [ 56/120 05:35 < 06:37, 0.16 it/s, Epoch 7/15]
+Safetensors PR exists
+ [54/54 06:24, Epoch 6/6]
 Epoch	Training Loss	Validation Loss	Accuracy	F1	Precision	Recall
-1	1.991200	0.447224	0.372881	0.389268	0.448896	0.372881
-2	1.632400	0.403508	0.593220	0.473646	0.437225	0.593220
-3	1.351800	0.308759	0.644068	0.624256	0.641362	0.644068
-4	1.108400	0.286513	0.677966	0.633624	0.675210	0.677966
-5	0.933800	0.290119	0.661017	0.632232	0.641986	0.661017
-6	0.816600	0.288644	0.661017	0.620512	0.641990	0.661017
-7	0.681800	0.272370	0.559322	0.568061	0.585256	0.559322
+1	0.933900	0.426753	0.500000	0.333333	0.250000	0.500000
+2	0.848300	0.449921	0.470588	0.405308	0.359069	0.470588
+3	0.841400	0.400281	0.602941	0.495150	0.484571	0.602941
+4	0.665600	0.315500	0.544118	0.549208	0.570519	0.544118
+5	0.564000	0.303607	0.617647	0.558618	0.600218	0.617647
+6	0.457600	0.254265	0.647059	0.659165	0.705206	0.647059
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_4/checkpoint-8
-Configuration saved in ./xlnet_results/fold_4/checkpoint-8/config.json
-Model weights saved in ./xlnet_results/fold_4/checkpoint-8/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_4/checkpoint-8/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_4/checkpoint-8/special_tokens_map.json
-The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
-
-***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
+  Num examples = 68
+  Batch size = 32
 /usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
   _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
-Saving model checkpoint to ./xlnet_results/fold_4/checkpoint-16
-Configuration saved in ./xlnet_results/fold_4/checkpoint-16/config.json
-Model weights saved in ./xlnet_results/fold_4/checkpoint-16/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_4/checkpoint-16/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_4/checkpoint-16/special_tokens_map.json
+Saving model checkpoint to ./xlnet_results/fold_4/checkpoint-9
+Configuration saved in ./xlnet_results/fold_4/checkpoint-9/config.json
+Model weights saved in ./xlnet_results/fold_4/checkpoint-9/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_4/checkpoint-9/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_4/checkpoint-9/special_tokens_map.json
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_4/checkpoint-24
-Configuration saved in ./xlnet_results/fold_4/checkpoint-24/config.json
-Model weights saved in ./xlnet_results/fold_4/checkpoint-24/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_4/checkpoint-24/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_4/checkpoint-24/special_tokens_map.json
+  Num examples = 68
+  Batch size = 32
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Saving model checkpoint to ./xlnet_results/fold_4/checkpoint-18
+Configuration saved in ./xlnet_results/fold_4/checkpoint-18/config.json
+Model weights saved in ./xlnet_results/fold_4/checkpoint-18/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_4/checkpoint-18/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_4/checkpoint-18/special_tokens_map.json
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_4/checkpoint-32
-Configuration saved in ./xlnet_results/fold_4/checkpoint-32/config.json
-Model weights saved in ./xlnet_results/fold_4/checkpoint-32/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_4/checkpoint-32/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_4/checkpoint-32/special_tokens_map.json
+  Num examples = 68
+  Batch size = 32
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Saving model checkpoint to ./xlnet_results/fold_4/checkpoint-27
+Configuration saved in ./xlnet_results/fold_4/checkpoint-27/config.json
+Model weights saved in ./xlnet_results/fold_4/checkpoint-27/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_4/checkpoint-27/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_4/checkpoint-27/special_tokens_map.json
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_4/checkpoint-40
-Configuration saved in ./xlnet_results/fold_4/checkpoint-40/config.json
-Model weights saved in ./xlnet_results/fold_4/checkpoint-40/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_4/checkpoint-40/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_4/checkpoint-40/special_tokens_map.json
+  Num examples = 68
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_4/checkpoint-36
+Configuration saved in ./xlnet_results/fold_4/checkpoint-36/config.json
+Model weights saved in ./xlnet_results/fold_4/checkpoint-36/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_4/checkpoint-36/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_4/checkpoint-36/special_tokens_map.json
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_4/checkpoint-48
-Configuration saved in ./xlnet_results/fold_4/checkpoint-48/config.json
-Model weights saved in ./xlnet_results/fold_4/checkpoint-48/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_4/checkpoint-48/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_4/checkpoint-48/special_tokens_map.json
+  Num examples = 68
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_4/checkpoint-45
+Configuration saved in ./xlnet_results/fold_4/checkpoint-45/config.json
+Model weights saved in ./xlnet_results/fold_4/checkpoint-45/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_4/checkpoint-45/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_4/checkpoint-45/special_tokens_map.json
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_4/checkpoint-56
-Configuration saved in ./xlnet_results/fold_4/checkpoint-56/config.json
-Model weights saved in ./xlnet_results/fold_4/checkpoint-56/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_4/checkpoint-56/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_4/checkpoint-56/special_tokens_map.json
+  Num examples = 68
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_4/checkpoint-54
+Configuration saved in ./xlnet_results/fold_4/checkpoint-54/config.json
+Model weights saved in ./xlnet_results/fold_4/checkpoint-54/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_4/checkpoint-54/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_4/checkpoint-54/special_tokens_map.json
 
 
 Training completed. Do not forget to share your model on huggingface.co/models =)
 
 
-Loading best model from ./xlnet_results/fold_4/checkpoint-32 (score: 0.6336243793870912).
+Loading best model from ./xlnet_results/fold_4/checkpoint-54 (score: 0.6591645353793691).
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 59
-  Batch size = 16
+  Num examples = 68
+  Batch size = 32
 Evaluating fold 4 on its validation set...
- [4/4 00:03]
-Fold 4 - Validation F1: 0.6336, Accuracy: 0.6780
+ [3/3 00:01]
+Fold 4 - Validation F1: 0.6592, Accuracy: 0.6471
 \n--- Fold 5/5 ---
 Map: 100%
- 236/236 [00:00<00:00, 305.78 examples/s]
+ 272/272 [00:00<00:00, 313.45 examples/s]
 Map: 100%
- 58/58 [00:00<00:00, 283.75 examples/s]
+ 67/67 [00:00<00:00, 285.86 examples/s]
 loading configuration file config.json from cache at /root/.cache/huggingface/hub/models--xlnet-base-cased/snapshots/ceaa69c7bc5e512b5007106a7ccbb7daf24b2c79/config.json
 Model config XLNetConfig {
   "architectures": [
@@ -1457,103 +2333,116 @@ Model config XLNetConfig {
 
 loading weights file pytorch_model.bin from cache at /root/.cache/huggingface/hub/models--xlnet-base-cased/snapshots/ceaa69c7bc5e512b5007106a7ccbb7daf24b2c79/pytorch_model.bin
 Attempting to create safetensors variant
+Safetensors PR exists
 Some weights of the model checkpoint at xlnet-base-cased were not used when initializing XLNetForSequenceClassification: ['lm_loss.bias', 'lm_loss.weight']
 - This IS expected if you are initializing XLNetForSequenceClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
 - This IS NOT expected if you are initializing XLNetForSequenceClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
 Some weights of XLNetForSequenceClassification were not initialized from the model checkpoint at xlnet-base-cased and are newly initialized: ['logits_proj.bias', 'logits_proj.weight', 'sequence_summary.summary.bias', 'sequence_summary.summary.weight']
 You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
 PyTorch: setting up devices
-<ipython-input-4-b79c724d525b>:81: FutureWarning: `tokenizer` is deprecated and will be removed in version 5.0.0 for `CustomTrainer.__init__`. Use `processing_class` instead.
+<ipython-input-2-b03fa68760c4>:81: FutureWarning: `tokenizer` is deprecated and will be removed in version 5.0.0 for `CustomTrainer.__init__`. Use `processing_class` instead.
   super().__init__(*args, **kwargs)
 Using auto half precision backend
+Starting training for fold 5...
 The following columns in the Training set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 ***** Running training *****
-  Num examples = 236
-  Num Epochs = 15
-  Instantaneous batch size per device = 8
+  Num examples = 272
+  Num Epochs = 6
+  Instantaneous batch size per device = 16
   Total train batch size (w. parallel, distributed & accumulation) = 32
-  Gradient Accumulation steps = 4
-  Total optimization steps = 120
+  Gradient Accumulation steps = 2
+  Total optimization steps = 54
   Number of trainable parameters = 117,311,235
-Safetensors PR exists
-Starting training for fold 5...
- [ 40/120 04:38 < 09:47, 0.14 it/s, Epoch 5/15]
+ [54/54 07:00, Epoch 6/6]
 Epoch	Training Loss	Validation Loss	Accuracy	F1	Precision	Recall
-1	1.990400	0.485224	0.344828	0.312226	0.303879	0.344828
-2	1.538700	0.316774	0.758621	0.717657	0.835423	0.758621
-3	1.179700	0.246256	0.689655	0.662518	0.681034	0.689655
-4	0.969100	0.264849	0.672414	0.648989	0.659151	0.672414
-5	0.739500	0.223791	0.620690	0.627622	0.637931	0.620690
+1	0.951700	0.436914	0.507463	0.391866	0.349861	0.507463
+2	0.757700	0.372341	0.507463	0.498668	0.588825	0.507463
+3	0.511800	0.367570	0.611940	0.562238	0.634605	0.611940
+4	0.399700	0.396010	0.567164	0.570756	0.596042	0.567164
+5	0.260800	0.344390	0.582090	0.594657	0.651427	0.582090
+6	0.157900	0.297993	0.611940	0.618262	0.635732	0.611940
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 58
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_5/checkpoint-8
-Configuration saved in ./xlnet_results/fold_5/checkpoint-8/config.json
-Model weights saved in ./xlnet_results/fold_5/checkpoint-8/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_5/checkpoint-8/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_5/checkpoint-8/special_tokens_map.json
+  Num examples = 67
+  Batch size = 32
+/usr/local/lib/python3.11/dist-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
+Saving model checkpoint to ./xlnet_results/fold_5/checkpoint-9
+Configuration saved in ./xlnet_results/fold_5/checkpoint-9/config.json
+Model weights saved in ./xlnet_results/fold_5/checkpoint-9/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_5/checkpoint-9/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_5/checkpoint-9/special_tokens_map.json
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 58
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_5/checkpoint-16
-Configuration saved in ./xlnet_results/fold_5/checkpoint-16/config.json
-Model weights saved in ./xlnet_results/fold_5/checkpoint-16/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_5/checkpoint-16/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_5/checkpoint-16/special_tokens_map.json
+  Num examples = 67
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_5/checkpoint-18
+Configuration saved in ./xlnet_results/fold_5/checkpoint-18/config.json
+Model weights saved in ./xlnet_results/fold_5/checkpoint-18/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_5/checkpoint-18/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_5/checkpoint-18/special_tokens_map.json
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 58
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_5/checkpoint-24
-Configuration saved in ./xlnet_results/fold_5/checkpoint-24/config.json
-Model weights saved in ./xlnet_results/fold_5/checkpoint-24/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_5/checkpoint-24/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_5/checkpoint-24/special_tokens_map.json
+  Num examples = 67
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_5/checkpoint-27
+Configuration saved in ./xlnet_results/fold_5/checkpoint-27/config.json
+Model weights saved in ./xlnet_results/fold_5/checkpoint-27/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_5/checkpoint-27/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_5/checkpoint-27/special_tokens_map.json
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 58
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_5/checkpoint-32
-Configuration saved in ./xlnet_results/fold_5/checkpoint-32/config.json
-Model weights saved in ./xlnet_results/fold_5/checkpoint-32/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_5/checkpoint-32/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_5/checkpoint-32/special_tokens_map.json
+  Num examples = 67
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_5/checkpoint-36
+Configuration saved in ./xlnet_results/fold_5/checkpoint-36/config.json
+Model weights saved in ./xlnet_results/fold_5/checkpoint-36/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_5/checkpoint-36/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_5/checkpoint-36/special_tokens_map.json
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 58
-  Batch size = 16
-Saving model checkpoint to ./xlnet_results/fold_5/checkpoint-40
-Configuration saved in ./xlnet_results/fold_5/checkpoint-40/config.json
-Model weights saved in ./xlnet_results/fold_5/checkpoint-40/model.safetensors
-tokenizer config file saved in ./xlnet_results/fold_5/checkpoint-40/tokenizer_config.json
-Special tokens file saved in ./xlnet_results/fold_5/checkpoint-40/special_tokens_map.json
+  Num examples = 67
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_5/checkpoint-45
+Configuration saved in ./xlnet_results/fold_5/checkpoint-45/config.json
+Model weights saved in ./xlnet_results/fold_5/checkpoint-45/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_5/checkpoint-45/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_5/checkpoint-45/special_tokens_map.json
+The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
+
+***** Running Evaluation *****
+  Num examples = 67
+  Batch size = 32
+Saving model checkpoint to ./xlnet_results/fold_5/checkpoint-54
+Configuration saved in ./xlnet_results/fold_5/checkpoint-54/config.json
+Model weights saved in ./xlnet_results/fold_5/checkpoint-54/model.safetensors
+tokenizer config file saved in ./xlnet_results/fold_5/checkpoint-54/tokenizer_config.json
+Special tokens file saved in ./xlnet_results/fold_5/checkpoint-54/special_tokens_map.json
 
 
 Training completed. Do not forget to share your model on huggingface.co/models =)
 
 
-Loading best model from ./xlnet_results/fold_5/checkpoint-16 (score: 0.7176568188167651).
+Loading best model from ./xlnet_results/fold_5/checkpoint-54 (score: 0.6182617567553353).
 The following columns in the Evaluation set don't have a corresponding argument in `XLNetForSequenceClassification.forward` and have been ignored: __index_level_0__. If __index_level_0__ are not expected by `XLNetForSequenceClassification.forward`,  you can safely ignore this message.
 
 ***** Running Evaluation *****
-  Num examples = 58
-  Batch size = 16
+  Num examples = 67
+  Batch size = 32
 Evaluating fold 5 on its validation set...
- [4/4 00:03]
-Fold 5 - Validation F1: 0.7177, Accuracy: 0.7586
+ [3/3 00:01]
+Fold 5 - Validation F1: 0.6183, Accuracy: 0.6119
 \n--- Cross-Validation Summary (Average over folds) ---
-avg_eval_loss: 0.2331
-avg_eval_accuracy: 0.7382
-avg_eval_f1: 0.7202
-avg_eval_precision: 0.7597
-avg_eval_recall: 0.7382
+avg_eval_loss: 0.3187
+avg_eval_accuracy: 0.6430
+avg_eval_f1: 0.6434
+avg_eval_precision: 0.6708
+avg_eval_recall: 0.6430
 \nLoading the overall best model from cross-validation...
 loading configuration file config.json from cache at /root/.cache/huggingface/hub/models--xlnet-base-cased/snapshots/ceaa69c7bc5e512b5007106a7ccbb7daf24b2c79/config.json
 Model config XLNetConfig {
@@ -1616,46 +2505,46 @@ Some weights of the model checkpoint at xlnet-base-cased were not used when init
 Some weights of XLNetForSequenceClassification were not initialized from the model checkpoint at xlnet-base-cased and are newly initialized: ['logits_proj.bias', 'logits_proj.weight', 'sequence_summary.summary.bias', 'sequence_summary.summary.weight']
 You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
 Configuration saved in ./xlnet_classifier_cv/config.json
-Safetensors PR exists
 Saving the best model to ./xlnet_classifier_cv...
 Model weights saved in ./xlnet_classifier_cv/model.safetensors
+Safetensors PR exists
 tokenizer config file saved in ./xlnet_classifier_cv/tokenizer_config.json
 Special tokens file saved in ./xlnet_classifier_cv/special_tokens_map.json
 Plotting training history of the best fold...
 Training history plot saved to xlnet_training_history_cv_best_fold.png
 \nEvaluating the best model on the hold-out test set...
 Map: 100%
- 52/52 [00:00<00:00, 280.91 examples/s]
+ 60/60 [00:00<00:00, 256.38 examples/s]
 PyTorch: setting up devices
-<ipython-input-4-b79c724d525b>:477: FutureWarning: `tokenizer` is deprecated and will be removed in version 5.0.0 for `Trainer.__init__`. Use `processing_class` instead.
+<ipython-input-2-b03fa68760c4>:477: FutureWarning: `tokenizer` is deprecated and will be removed in version 5.0.0 for `Trainer.__init__`. Use `processing_class` instead.
   test_trainer = Trainer(
 Using auto half precision backend
 
 ***** Running Prediction *****
-  Num examples = 52
-  Batch size = 16
+  Num examples = 60
+  Batch size = 32
 \nTest Set Evaluation Report:
               precision    recall  f1-score   support
 
-AI-Generated     1.0000    0.8889    0.9412         9
-   Authentic     0.7778    0.7778    0.7778        27
-     Generic     0.5882    0.6250    0.6061        16
+AI-Generated     0.9000    0.7500    0.8182        12
+   Authentic     0.6667    0.6667    0.6667        30
+     Generic     0.4500    0.5000    0.4737        18
 
-    accuracy                         0.7500        52
-   macro avg     0.7887    0.7639    0.7750        52
-weighted avg     0.7579    0.7500    0.7532        52
+    accuracy                         0.6333        60
+   macro avg     0.6722    0.6389    0.6528        60
+weighted avg     0.6483    0.6333    0.6391        60
 
 Plotting confusion matrix for the test set...
 Confusion matrix saved to xlnet_confusion_matrix_cv_test.png
-\nExplaining prediction for a random sample from test set (True Label: Authentic):
+\nExplaining prediction for a random sample from test set (True Label: AI-Generated):
 Warning: XLNet embedding layer 'model.transformer.word_emb' not found. Using 'model.transformer.word_embedding' as fallback or check model structure.
-  Could not generate explanation: CUDA out of memory. Tried to allocate 14.65 GiB. GPU 0 has a total capacity of 14.74 GiB of which 10.83 GiB is free. Process 23509 has 3.91 GiB memory in use. Of the allocated memory 3.32 GiB is allocated by PyTorch, and 461.80 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+  Could not generate explanation: CUDA out of memory. Tried to allocate 16.48 GiB. GPU 0 has a total capacity of 14.74 GiB of which 740.12 MiB is free. Process 14957 has 14.02 GiB memory in use. Of the allocated memory 12.77 GiB is allocated by PyTorch, and 1.11 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
 \nXLNet training and evaluation with cross-validation finished.
 Traceback (most recent call last):
-  File "<ipython-input-4-b79c724d525b>", line 510, in train_model_with_cv
+  File "<ipython-input-2-b03fa68760c4>", line 510, in train_model_with_cv
     explanation = explain_prediction(
                   ^^^^^^^^^^^^^^^^^^^
-  File "<ipython-input-4-b79c724d525b>", line 292, in explain_prediction
+  File "<ipython-input-2-b03fa68760c4>", line 292, in explain_prediction
     attributions, delta = lig.attribute(
                           ^^^^^^^^^^^^^^
   File "/usr/local/lib/python3.11/dist-packages/captum/log/dummy_log.py", line 39, in wrapper
@@ -1721,11 +2610,11 @@ Traceback (most recent call last):
   File "/usr/local/lib/python3.11/dist-packages/transformers/models/xlnet/modeling_xlnet.py", line 425, in forward
     attn_vec = self.rel_attn_core(
                ^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/dist-packages/transformers/models/xlnet/modeling_xlnet.py", line 263, in rel_attn_core
-    ac = torch.einsum("ibnd,jbnd->bnij", q_head + self.r_w_bias, k_head_h)
+  File "/usr/local/lib/python3.11/dist-packages/transformers/models/xlnet/modeling_xlnet.py", line 266, in rel_attn_core
+    bd = torch.einsum("ibnd,jbnd->bnij", q_head + self.r_r_bias, k_head_r)
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "/usr/local/lib/python3.11/dist-packages/torch/functional.py", line 407, in einsum
     return _VF.einsum(equation, operands)  # type: ignore[attr-defined]
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 14.65 GiB. GPU 0 has a total capacity of 14.74 GiB of which 10.83 GiB is free. Process 23509 has 3.91 GiB memory in use. Of the allocated memory 3.32 GiB is allocated by PyTorch, and 461.80 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 16.48 GiB. GPU 0 has a total capacity of 14.74 GiB of which 740.12 MiB is free. Process 14957 has 14.02 GiB memory in use. Of the allocated memory 12.77 GiB is allocated by PyTorch, and 1.11 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
 """
